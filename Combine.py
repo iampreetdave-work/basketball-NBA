@@ -6,6 +6,7 @@ Outputs to Future.csv with optimized column ordering
 
 import pandas as pd
 import os
+import sys
 from datetime import datetime
 
 
@@ -204,30 +205,30 @@ def merge_csvs(prematch_file: str, odds_file: str, output_file: str = "Future.cs
 
 
 def main():
-    """Main execution"""
+    """Main execution - fully automated, no user interaction"""
     
     print("\n" + "="*80)
     print("CSV MERGE UTILITY - Pre_Match + Future_Check")
     print("="*80)
     
-    # Default file paths (can be customized)
-    prematch_file = input("\nEnter Pre_Match CSV file path (or press Enter for 'nba_prematch_features.csv'): ").strip()
+    # FULLY AUTOMATED: Use default file paths
+    print("\n🤖 Running in automated mode")
+    
+    # Try to find the most recent prematch file
+    prematch_file = None
+    for file in sorted(os.listdir('.'), reverse=True):
+        if file.startswith('nba_prematch_features') and file.endswith('.csv'):
+            prematch_file = file
+            break
     if not prematch_file:
-        # Try to find the most recent file
-        for file in sorted(os.listdir('.'), reverse=True):
-            if file.startswith('nba_prematch_features_') and file.endswith('.csv'):
-                prematch_file = file
-                break
-        if not prematch_file:
-            prematch_file = "nba_prematch_features.csv"
+        prematch_file = "nba_prematch_features.csv"
     
-    odds_file = input("Enter Future_Check CSV file path (or press Enter for 'upcoming_nba_draftkings_odds.csv'): ").strip()
-    if not odds_file:
-        odds_file = "upcoming_nba_draftkings_odds.csv"
+    odds_file = "upcoming_nba_draftkings_odds.csv"
+    output_file = "Future.csv"
     
-    output_file = input("Enter output filename (or press Enter for 'Future.csv'): ").strip()
-    if not output_file:
-        output_file = "Future.csv"
+    print(f"  Using: {prematch_file}")
+    print(f"  Using: {odds_file}")
+    print(f"  Output: {output_file}\n")
     
     # Execute merge
     merge_csvs(prematch_file, odds_file, output_file)
