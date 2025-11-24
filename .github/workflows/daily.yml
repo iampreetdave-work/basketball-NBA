@@ -30,7 +30,7 @@ jobs:
     - name: Step 2 - Extract Features
       run: python Odds_Pre_Match.py
     - name: Step 3 - Generate Predictions
-      run: Combine.py
+      run: python Combine.py
     - name: Commit and push results
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
