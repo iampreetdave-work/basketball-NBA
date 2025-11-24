@@ -1,17 +1,15 @@
 name: NBA Daily Predictions
-
 on:
   schedule:
     - cron: '30 7 * * *'  # Runs daily at 7:30 AM UTC
   workflow_dispatch:  # Allow manual trigger
-
 jobs:
   predict:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
@@ -45,7 +43,7 @@ jobs:
       
       - name: Upload predictions artifact
         if: steps.check_csv.outputs.exists == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nba-predictions-${{ github.run_number }}
           path: predictions_output/
