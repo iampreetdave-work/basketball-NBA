@@ -12,7 +12,7 @@ import os
 # THE ODDS API CONFIGURATION
 # ============================================================================
 
-API_KEY = "6748faabba34e1b5a5c56999416b8145"
+API_KEY = "83dcdaff13977e39bc65141046c993f3"
 BASE_URL = "https://api.the-odds-api.com/v4"
 SPORT = "basketball_nba"
 
@@ -252,4 +252,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
