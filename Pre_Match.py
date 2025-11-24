@@ -55,7 +55,7 @@ TEAM_ALIASES = {
 }
 
 # API Configuration
-API_KEY = "lIIRZjnpCE3GYS834fA6U7xBnj0dKISND5UJf4Lh"
+API_KEY = "jdP3cFD34Ox128KeOzk1QO80WKPYoh8ZKzjLeL0H"
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
 VERSION = "v8"
@@ -589,4 +589,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
