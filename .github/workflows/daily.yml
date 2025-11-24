@@ -16,55 +16,108 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
+    
+    - name: Verify checked out files
+      run: |
+        echo "📂 Current directory:"
+        pwd
+        echo ""
+        echo "📋 All files in repository:"
+        ls -la
+        echo ""
+        echo "🐍 Python files:"
+        ls -la *.py || echo "No Python files found in root"
+        echo ""
+        echo "📄 Checking if Combine.py exists:"
+        if [ -f "Combine.py" ]; then
+          echo "✅ Combine.py found"
+          cat Combine.py | head -20
+        else
+          echo "❌ Combine.py NOT found"
+        fi
+    
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         cache: 'pip'
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    
     - name: Step 1 - Fetch today matches and features
       run: python Pre_Match.py
+    
     - name: Step 2 - Extract Features
       run: python Odds_Pre_Match.py
+    
     - name: Step 3 - Generate Predictions
-      run: python Combine.py
+      run: |
+        echo "🚀 Running Combine.py..."
+        if [ ! -f "Combine.py" ]; then
+          echo "❌ ERROR: Combine.py not found!"
+          ls -la
+          exit 1
+        fi
+        python Combine.py
+    
+    - name: Verify output files
+      run: |
+        echo "📊 Checking generated CSV files:"
+        ls -lh *.csv || echo "No CSV files found"
+        echo ""
+        if [ -f "Future.csv" ]; then
+          echo "✅ Future.csv generated successfully"
+          echo "File size: $(ls -lh Future.csv | awk '{print $5}')"
+          echo "Lines: $(wc -l Future.csv)"
+        else
+          echo "❌ Future.csv not found!"
+        fi
+    
     - name: Commit and push results
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        # THE FIX: Pull before pushing to avoid conflicts
+        
+        # Pull before pushing to avoid conflicts
         echo "🔄 Syncing with remote..."
         git pull --rebase origin main || git pull --rebase origin master || echo "Already up to date"
+        
         # Add generated CSV files
         echo "📁 Adding prediction files..."
-        git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv
+        git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv 2>/dev/null || echo "Some files may not exist"
+        
         # Check if there are changes
         if git diff --staged --quiet; then
           echo "ℹ️ No changes to commit"
           exit 0
         fi
+        
         # Commit changes
         echo "✅ Changes detected, committing..."
         git commit -m "🤖 Auto-update predictions - $(date +'%Y-%m-%d %H:%M:%S UTC')"
+        
         # Push with retry logic (5 attempts)
         max_retries=5
         retry_count=0
         while [ $retry_count -lt $max_retries ]; do
           retry_count=$((retry_count+1))
           echo "📤 Push attempt $retry_count/$max_retries..."
+          
           # Try main branch first
           if git push origin main 2>&1; then
             echo "✅ Successfully pushed to main!"
             exit 0
           fi
+          
           # Try master branch as fallback
           if git push origin master 2>&1; then
             echo "✅ Successfully pushed to master!"
             exit 0
           fi
+          
           # If not last attempt, sync and retry
           if [ $retry_count -lt $max_retries ]; then
             echo "⏳ Retrying in 10 seconds..."
@@ -73,10 +126,12 @@ jobs:
             git pull --rebase origin main 2>&1 || git pull --rebase origin master 2>&1 || true
           fi
         done
+        
         # All retries failed
         echo "❌ Failed to push after $max_retries attempts"
         exit 1
-    # Optional: Upload as backup (using v4, not deprecated v3)
+    
+    # Upload as backup
     - name: Upload predictions as backup
       if: always()
       uses: actions/upload-artifact@v4
