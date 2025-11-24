@@ -17,6 +17,9 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
     
+    - name: Create pre_match folder
+      run: mkdir -p pre_match
+    
     - name: Verify checked out files
       run: |
         echo "📂 Current directory:"
@@ -63,15 +66,21 @@ jobs:
         fi
         python Combine.py
     
+    - name: Move CSVs to pre_match folder
+      run: |
+        [ -f "nba_prematch_features.csv" ] && mv nba_prematch_features.csv pre_match/
+        [ -f "upcoming_nba_draftkings_odds.csv" ] && mv upcoming_nba_draftkings_odds.csv pre_match/
+        [ -f "Future.csv" ] && mv Future.csv pre_match/
+    
     - name: Verify output files
       run: |
         echo "📊 Checking generated CSV files:"
-        ls -lh *.csv || echo "No CSV files found"
+        ls -lh pre_match/*.csv || echo "No CSV files found"
         echo ""
-        if [ -f "Future.csv" ]; then
+        if [ -f "pre_match/Future.csv" ]; then
           echo "✅ Future.csv generated successfully"
-          echo "File size: $(ls -lh Future.csv | awk '{print $5}')"
-          echo "Lines: $(wc -l Future.csv)"
+          echo "File size: $(ls -lh pre_match/Future.csv | awk '{print $5}')"
+          echo "Lines: $(wc -l pre_match/Future.csv)"
         else
           echo "❌ Future.csv not found!"
         fi
@@ -87,7 +96,7 @@ jobs:
         
         # Add generated CSV files
         echo "📁 Adding prediction files..."
-        git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv 2>/dev/null || echo "Some files may not exist"
+        git add -f pre_match/nba_prematch_features.csv pre_match/upcoming_nba_draftkings_odds.csv pre_match/Future.csv 2>/dev/null || echo "Some files may not exist"
         
         # Check if there are changes
         if git diff --staged --quiet; then
@@ -137,8 +146,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: predictions-${{ github.run_number }}
-        path: |
-          nba_prematch_features.csv 
-          upcoming_nba_draftkings_odds.csv 
-          Future.csv
+        path: pre_match/
         retention-days: 7
