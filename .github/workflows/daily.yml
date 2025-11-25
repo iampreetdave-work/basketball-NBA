@@ -66,21 +66,15 @@ jobs:
         fi
         python Combine.py
     
-    - name: Move CSVs to pre_match folder
-      run: |
-        [ -f "nba_prematch_features.csv" ] && mv nba_prematch_features.csv pre_match/
-        [ -f "upcoming_nba_draftkings_odds.csv" ] && mv upcoming_nba_draftkings_odds.csv pre_match/
-        [ -f "Future.csv" ] && mv Future.csv pre_match/
-    
     - name: Verify output files
       run: |
         echo "📊 Checking generated CSV files:"
-        ls -lh pre_match/*.csv || echo "No CSV files found"
+        ls -lh *.csv 2>/dev/null || echo "No CSV files found in root"
         echo ""
-        if [ -f "pre_match/Future.csv" ]; then
+        if [ -f "Future.csv" ]; then
           echo "✅ Future.csv generated successfully"
-          echo "File size: $(ls -lh pre_match/Future.csv | awk '{print $5}')"
-          echo "Lines: $(wc -l pre_match/Future.csv)"
+          echo "File size: $(ls -lh Future.csv | awk '{print $5}')"
+          echo "Lines: $(wc -l Future.csv)"
         else
           echo "❌ Future.csv not found!"
         fi
@@ -94,9 +88,9 @@ jobs:
         echo "🔄 Syncing with remote..."
         git pull --rebase origin main || git pull --rebase origin master || echo "Already up to date"
         
-        # Add generated CSV files
-        echo "📁 Adding prediction files..."
-        git add -f pre_match/nba_prematch_features.csv pre_match/upcoming_nba_draftkings_odds.csv pre_match/Future.csv 2>/dev/null || echo "Some files may not exist"
+        # Add generated CSV files from root
+        echo "📁 Adding prediction files from root..."
+        git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv 2>/dev/null || echo "Some files may not exist"
         
         # Check if there are changes
         if git diff --staged --quiet; then
@@ -146,5 +140,8 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: predictions-${{ github.run_number }}
-        path: pre_match/
+        path: |
+          nba_prematch_features.csv
+          upcoming_nba_draftkings_odds.csv
+          Future.csv
         retention-days: 7
