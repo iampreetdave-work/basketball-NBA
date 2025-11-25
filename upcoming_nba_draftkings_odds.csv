@@ -1,0 +1,7 @@
+game_identifier,date,start_time,home_team,away_team,status,away_winning_odds_decimal,home_winning_odds_decimal,over_odds_decimal,total_line,under_odds_decimal
+2025-11-25_HOU@PHX,2025-11-25,2025-11-25T02:43:00Z,Phoenix Suns,Houston Rockets,upcoming,1.11,6.75,1.91,219.5,1.83
+2025-11-25_UTAH@GS,2025-11-25,2025-11-25T03:11:00Z,Golden State Warriors,Utah Jazz,upcoming,13.0,1.04,1.91,244.5,1.83
+2025-11-25_MIN@SAC,2025-11-25,2025-11-25T03:11:00Z,Sacramento Kings,Minnesota Timberwolves,upcoming,1.12,6.2,1.83,220.5,1.91
+2025-11-26_ATL@WSH,2025-11-26,2025-11-26T00:10:00Z,Washington Wizards,Atlanta Hawks,upcoming,1.21,4.6,1.91,236.5,1.91
+2025-11-26_ORL@PHI,2025-11-26,2025-11-26T01:10:00Z,Philadelphia 76ers,Orlando Magic,upcoming,1.83,2.0,1.91,227.5,1.91
+2025-11-26_LOS@LAL,2025-11-26,2025-11-26T04:10:00Z,Los Angeles Lakers,Los Angeles Clippers,upcoming,2.85,1.44,1.91,227.5,1.91
