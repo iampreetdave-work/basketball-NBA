@@ -554,7 +554,7 @@ def main():
     
     # Save to CSV
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f"nba_prematch_features_{timestamp}.csv"
+    filename = f"nba_prematch_features.csv"
     df.to_csv(filename, index=False)
     
     print(f"\n{'='*60}")
@@ -591,4 +591,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
