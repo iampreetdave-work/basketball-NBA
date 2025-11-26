@@ -1,4 +1,10 @@
-game_identifier,date,start_time,home_team,away_team,status,away_winning_odds_decimal,home_winning_odds_decimal,over_odds_decimal,total_line,under_odds_decimal
-2025-11-26_ATL@WSH,2025-11-26,2025-11-26T00:10:00Z,Washington Wizards,Atlanta Hawks,upcoming,1.21,4.6,1.91,236.5,1.91
-2025-11-26_ORL@PHI,2025-11-26,2025-11-26T01:10:00Z,Philadelphia 76ers,Orlando Magic,upcoming,1.82,2.02,1.91,227.5,1.91
-2025-11-26_LOS@LAL,2025-11-26,2025-11-26T04:10:00Z,Los Angeles Lakers,Los Angeles Clippers,upcoming,2.95,1.42,1.93,228.5,1.89
+game_identifier,date,start_time,home_team,away_team,status,home_winning_odds_decimal,away_winning_odds_decimal,over_odds_decimal,total_line,under_odds_decimal
+2025-11-26_DET@BOS,2025-11-26,2025-11-26T22:10:00Z,Boston Celtics,Detroit Pistons,upcoming,2.24,1.68,1.89,229.5,1.93
+2025-11-27_NY@CHA,2025-11-27,2025-11-27T00:10:00Z,Charlotte Hornets,New York Knicks,upcoming,3.1,1.39,1.91,238.5,1.91
+2025-11-27_IND@TOR,2025-11-27,2025-11-27T00:40:00Z,Toronto Raptors,Indiana Pacers,upcoming,1.24,4.3,1.87,234.5,1.95
+2025-11-27_MIL@MIA,2025-11-27,2025-11-27T00:40:00Z,Miami Heat,Milwaukee Bucks,upcoming,1.35,3.3,1.93,237.5,1.89
+2025-11-27_MIN@OKC,2025-11-27,2025-11-27T00:40:00Z,Oklahoma City Thunder,Minnesota Timberwolves,upcoming,1.28,3.8,1.89,226.5,1.93
+2025-11-27_MEM@NO,2025-11-27,2025-11-27T01:10:00Z,New Orleans Pelicans,Memphis Grizzlies,upcoming,2.02,1.82,1.91,234.5,1.91
+2025-11-27_HOU@GS,2025-11-27,2025-11-27T03:10:00Z,Golden State Warriors,Houston Rockets,upcoming,1.8,2.05,1.95,224.5,1.87
+2025-11-27_PHX@SAC,2025-11-27,2025-11-27T03:10:00Z,Sacramento Kings,Phoenix Suns,upcoming,2.54,1.54,1.91,233.5,1.91
+2025-11-27_SA@POR,2025-11-27,2025-11-27T03:10:00Z,Portland Trail Blazers,San Antonio Spurs,upcoming,1.8,2.05,1.89,239.5,1.93
