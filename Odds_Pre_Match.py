@@ -12,9 +12,16 @@ import os
 # THE ODDS API CONFIGURATION
 # ============================================================================
 
-API_KEY = "83dcdaff13977e39bc65141046c993f3"
+API_KEYS = [
+    "83dcdaff13977e39bc65141046c993f3",
+    "02a80c14ece71bed354b63915e3fb8b3",
+    "30d78032b75c0922de70de22f0337b91",
+    "8972d0f8f1c909b2791607ed1a29d6a5",
+    "7483e0df3726e14cdb152f580291f47d"
+]
 BASE_URL = "https://api.the-odds-api.com/v4"
 SPORT = "basketball_nba"
+RATE_LIMIT_THRESHOLD = 5
 
 # Team name to alias mapping
 TEAM_ALIASES = {
@@ -52,39 +59,77 @@ TEAM_ALIASES = {
 }
 
 
-def get_upcoming_nba_odds():
-    """Fetch upcoming NBA games with DraftKings odds"""
-    print(f"\n{'='*80}")
-    print(f"FETCHING UPCOMING NBA GAMES WITH DRAFTKINGS ODDS")
-    print(f"{'='*80}\n")
+class OddsAPIClient:
+    """Client for The Odds API with multi-key support"""
     
-    endpoint = f"{BASE_URL}/sports/{SPORT}/odds"
-    params = {
-        "apiKey": API_KEY,
-        "regions": "us",
-        "markets": "h2h,totals",
-        "oddsFormat": "decimal",
-        "bookmakers": "draftkings"
-    }
+    def __init__(self, api_keys=API_KEYS):
+        self.api_keys = api_keys
+        self.current_key_index = 0
+        self.rate_limit_count = 0
     
-    try:
-        print(f"Calling API...", flush=True)
-        response = requests.get(endpoint, params=params, timeout=30)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✓ Found {len(data)} games\n")
-            return data
-        elif response.status_code == 429:
-            print("✗ RATE LIMIT - Please wait and try again")
-            return None
+    def _get_current_api_key(self) -> str:
+        """Get the current active API key"""
+        return self.api_keys[self.current_key_index]
+    
+    def _switch_api_key(self) -> None:
+        """Switch to the next API key"""
+        if self.current_key_index < len(self.api_keys) - 1:
+            self.current_key_index += 1
+            self.rate_limit_count = 0
+            print(f"  Switching to API key {self.current_key_index + 1}/{len(self.api_keys)}")
         else:
-            print(f"✗ Error {response.status_code}: {response.text}")
-            return None
+            self.rate_limit_count = 0
+            print(f"  All API keys exhausted, resetting rate limit count")
+    
+    def get_upcoming_nba_odds(self):
+        """Fetch upcoming NBA games with DraftKings odds"""
+        print(f"\n{'='*80}")
+        print(f"FETCHING UPCOMING NBA GAMES WITH DRAFTKINGS ODDS")
+        print(f"{'='*80}\n")
+        
+        endpoint = f"{BASE_URL}/sports/{SPORT}/odds"
+        params = {
+            "apiKey": self._get_current_api_key(),
+            "regions": "us",
+            "markets": "h2h,totals",
+            "oddsFormat": "decimal",
+            "bookmakers": "draftkings"
+        }
+        
+        try:
+            print(f"Calling API...", flush=True)
+            response = requests.get(endpoint, params=params, timeout=30)
             
-    except Exception as e:
-        print(f"✗ Exception: {e}")
-        return None
+            if response.status_code == 200:
+                self.rate_limit_count = 0
+                data = response.json()
+                print(f"✓ Found {len(data)} games\n")
+                return data
+            elif response.status_code == 429:
+                self.rate_limit_count += 1
+                print(f"  Rate limit hit ({self.rate_limit_count}/{RATE_LIMIT_THRESHOLD})")
+                
+                if self.rate_limit_count >= RATE_LIMIT_THRESHOLD:
+                    self._switch_api_key()
+                    print("  Retrying with new API key...")
+                    params["apiKey"] = self._get_current_api_key()
+                    response = requests.get(endpoint, params=params, timeout=30)
+                    
+                    if response.status_code == 200:
+                        self.rate_limit_count = 0
+                        data = response.json()
+                        print(f"✓ Found {len(data)} games\n")
+                        return data
+                
+                print("✗ RATE LIMIT - Please wait and try again")
+                return None
+            else:
+                print(f"✗ Error {response.status_code}: {response.text}")
+                return None
+                
+        except Exception as e:
+            print(f"✗ Exception: {e}")
+            return None
 
 
 def extract_draftkings_odds(games):
@@ -169,9 +214,14 @@ def main():
     print("\n" + "="*80)
     print("THE ODDS API - UPCOMING NBA DRAFTKINGS ODDS")
     print("="*80)
+    print(f"API keys available: {len(API_KEYS)}")
+    print(f"Rate limit threshold: {RATE_LIMIT_THRESHOLD} consecutive hits")
+    
+    # Initialize API client
+    client = OddsAPIClient()
     
     # Step 1: Get upcoming games with odds
-    games = get_upcoming_nba_odds()
+    games = client.get_upcoming_nba_odds()
     
     if not games:
         print("\n✗ No games found")
@@ -252,5 +302,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
