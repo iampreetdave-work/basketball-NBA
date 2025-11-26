@@ -73,13 +73,11 @@ def merge_csvs(prematch_file: str, odds_file: str, output_file: str = "Future.cs
     # Check what odds columns exist and map them
     if 'home_winning_odds_decimal' in df_odds.columns:
         odds_columns_to_extract.append('home_winning_odds_decimal')
-        column_rename_map['home_winning_odds_decimal'] = 'home_odds'
-        print("✓ Found home_winning_odds_decimal → renaming to home_odds")
+        print("✓ Found home_winning_odds_decimal")
     
     if 'away_winning_odds_decimal' in df_odds.columns:
         odds_columns_to_extract.append('away_winning_odds_decimal')
-        column_rename_map['away_winning_odds_decimal'] = 'away_odds'
-        print("✓ Found away_winning_odds_decimal → renaming to away_odds")
+        print("✓ Found away_winning_odds_decimal")
     
     if 'total_line' in df_odds.columns:
         odds_columns_to_extract.append('total_line')
@@ -106,8 +104,8 @@ def merge_csvs(prematch_file: str, odds_file: str, output_file: str = "Future.cs
     )
     
     print(f"✓ Merged on 'game_identifier'")
-    print(f"  Games with odds: {df_merged['home_odds'].notna().sum()}")
-    print(f"  Games without odds: {df_merged['home_odds'].isna().sum()}")
+    print(f"  Games with odds: {df_merged['home_winning_odds_decimal'].notna().sum()}")
+    print(f"  Games without odds: {df_merged['home_winning_odds_decimal'].isna().sum()}")
     
     # Step 5: Reorganize columns
     print(f"\n{'='*80}")
@@ -122,7 +120,7 @@ def merge_csvs(prematch_file: str, odds_file: str, output_file: str = "Future.cs
     ]
     
     # Betting odds columns (at the end)
-    odds_cols = ['home_odds', 'away_odds', 'total_line']
+    odds_cols = ['home_winning_odds_decimal', 'away_winning_odds_decimal', 'total_line']
     
     # Build final column order
     final_col_order = []
@@ -169,15 +167,15 @@ def merge_csvs(prematch_file: str, odds_file: str, output_file: str = "Future.cs
     print(f"Odds games: {len(df_odds)}")
     print(f"Merged games: {len(df_merged)}")
     print(f"\nMatch results:")
-    print(f"  Games matched with odds: {df_merged['home_odds'].notna().sum()}")
-    print(f"  Games without odds: {df_merged['home_odds'].isna().sum()}")
-    print(f"  Match rate: {(df_merged['home_odds'].notna().sum() / len(df_merged) * 100):.1f}%")
+    print(f"  Games matched with odds: {df_merged['home_winning_odds_decimal'].notna().sum()}")
+    print(f"  Games without odds: {df_merged['home_winning_odds_decimal'].isna().sum()}")
+    print(f"  Match rate: {(df_merged['home_winning_odds_decimal'].notna().sum() / len(df_merged) * 100):.1f}%")
     
     # Show odds statistics
-    if df_merged['home_odds'].notna().sum() > 0:
+    if df_merged['home_winning_odds_decimal'].notna().sum() > 0:
         print(f"\nOdds statistics (matched games):")
-        print(f"  Home odds: {df_merged['home_odds'].min():.2f} - {df_merged['home_odds'].max():.2f}")
-        print(f"  Away odds: {df_merged['away_odds'].min():.2f} - {df_merged['away_odds'].max():.2f}")
+        print(f"  Home odds: {df_merged['home_winning_odds_decimal'].min():.2f} - {df_merged['home_winning_odds_decimal'].max():.2f}")
+        print(f"  Away odds: {df_merged['away_winning_odds_decimal'].min():.2f} - {df_merged['away_winning_odds_decimal'].max():.2f}")
         
         if 'total_line' in df_merged.columns:
             total_notna = df_merged['total_line'].notna().sum()
@@ -191,7 +189,7 @@ def merge_csvs(prematch_file: str, odds_file: str, output_file: str = "Future.cs
     
     sample_cols = [
         'game_identifier', 'home_alias', 'away_alias',
-        'home_odds', 'away_odds', 'total_line'
+        'home_winning_odds_decimal', 'away_winning_odds_decimal', 'total_line'
     ]
     
     available_sample_cols = [c for c in sample_cols if c in df_merged.columns]
