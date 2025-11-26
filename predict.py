@@ -49,33 +49,24 @@ print("="*80)
 # ============================================================================
 print("\n[1/5] Loading trained models...")
 
-model_dir = './'  # Change this if your models are in a different directory
+model_dir = './model'  # Load models from 'model' folder in same directory
 
 try:
-    # Load HOME ensemble models
-    with open(f'{model_dir}hybrid_home_xgb.pkl', 'rb') as f:
-        h_xgb = pickle.load(f)
-    with open(f'{model_dir}hybrid_home_lgb.pkl', 'rb') as f:
-        h_lgb = pickle.load(f)
-    with open(f'{model_dir}hybrid_home_gb.pkl', 'rb') as f:
-        h_gb = pickle.load(f)
-    with open(f'{model_dir}hybrid_home_rf.pkl', 'rb') as f:
-        h_rf = pickle.load(f)
+    # Load HOME model (single XGB)
+    with open(f'{model_dir}/hybrid_home_xgb.pkl', 'rb') as f:
+        home_model = pickle.load(f)
     
-    # Load HOME weights
-    with open(f'{model_dir}hybrid_home_weights.pkl', 'rb') as f:
-        h_weights = pickle.load(f)
-    
-    # Load AWAY model
-    with open(f'{model_dir}hybrid_away_xgb.pkl', 'rb') as f:
+    # Load AWAY model (single XGB)
+    with open(f'{model_dir}/hybrid_away_xgb.pkl', 'rb') as f:
         away_model = pickle.load(f)
     
     # Load scaler
-    with open(f'{model_dir}hybrid_scaler.pkl', 'rb') as f:
+    with open(f'{model_dir}/hybrid_scaler.pkl', 'rb') as f:
         scaler = pickle.load(f)
     
     print("  ✓ All models loaded successfully")
-    print(f"  ✓ HOME weights: {', '.join([f'{k}={v:.3f}' for k, v in h_weights.items()])}")
+    print(f"  ✓ HOME: Single XGBoost model")
+    print(f"  ✓ AWAY: Single XGBoost model")
     
 except FileNotFoundError as e:
     print(f"  ❌ Error: Could not find model files in '{model_dir}'")
@@ -173,14 +164,10 @@ print(f"  ✓ Features created and scaled")
 # ============================================================================
 print("\n[4/5] Making predictions...")
 
-# HOME predictions (ensemble)
-h_models = {'XGB': h_xgb, 'LGB': h_lgb, 'GB': h_gb, 'RF': h_rf}
-pred_home = np.zeros(len(X_all_scaled))
+# HOME prediction (single XGB)
+pred_home = home_model.predict(X_all_scaled)
 
-for name, model in h_models.items():
-    pred_home += h_weights[name] * model.predict(X_all_scaled)
-
-# AWAY predictions (single XGB)
+# AWAY prediction (single XGB)
 pred_away = away_model.predict(X_all_scaled)
 
 # Derived predictions
