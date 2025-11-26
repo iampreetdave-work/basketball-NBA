@@ -119,12 +119,12 @@ jobs:
       - name: Verify prediction output
         run: |
           echo "📊 Checking prediction outputs:"
-          if [ -f "NBA_PREDICTIONS.csv" ]; then
-            echo "✅ NBA_PREDICTIONS.csv generated"
-            echo "  Size: $(ls -lh NBA_PREDICTIONS.csv | awk '{print $5}')"
-            echo "  Lines: $(wc -l NBA_PREDICTIONS.csv)"
+          if [ -f "NBA_PREDICTIONS_ML.csv" ]; then
+            echo "✅ NBA_PREDICTIONS_ML.csv generated"
+            echo "  Size: $(ls -lh NBA_PREDICTIONS_ML.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l NBA_PREDICTIONS_ML.csv)"
           else
-            echo "❌ NBA_PREDICTIONS.csv not found"
+            echo "❌ NBA_PREDICTIONS_ML.csv not found"
           fi
       
       - name: Copy latest predictions to repo root
@@ -146,7 +146,7 @@ jobs:
           
           # Add generated CSV files
           echo "📁 Adding prediction files..."
-          git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv NBA_PREDICTIONS.csv 2>/dev/null || echo "Adding available files"
+          git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv NBA_PREDICTIONS_ML.csv 2>/dev/null || echo "Adding available files"
           
           # Check if there are changes
           if git diff --staged --quiet; then
@@ -194,5 +194,5 @@ jobs:
             nba_prematch_features.csv
             upcoming_nba_draftkings_odds.csv
             Future.csv
-            NBA_PREDICTIONS.csv
+            NBA_PREDICTIONS_ML.csv
           retention-days: 7
