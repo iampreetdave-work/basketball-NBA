@@ -15,7 +15,7 @@ import requests
 import pandas as pd
 import numpy as np
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Optional, Tuple
 from collections import defaultdict
 
@@ -55,13 +55,20 @@ TEAM_ALIASES = {
 }
 
 # API Configuration
-API_KEY = "yaVs9ag9ZV7B011YWcbOFuszgN5bdeTai5r8eVWi"
+API_KEYS = [
+    "jdP3cFD34Ox128KeOzk1QO80WKPYoh8ZKzjLeL0H",
+    "yaVs9ag9ZV7B011YWcbOFuszgN5bdeTai5r8eVWi",
+    "7iXdsTMLsQpiFV6f1aWUak0BOoYrmuAf4YD99oVE",
+    "dfgSQXX31W4efJ2Nqq71E35eVbtRBth8BYtHRYPc",
+    "6vTdojNKZXdXhLLN9XgqlqqfXC87g3L3EoagQVAi"
+]
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
 VERSION = "v8"
 LANGUAGE = "en"
 FORMAT = "json"
 REQUEST_DELAY = 1.5
+RATE_LIMIT_THRESHOLD = 5
 
 
 class PreMatchFeatureEngine:
@@ -69,8 +76,10 @@ class PreMatchFeatureEngine:
     Fetches upcoming games and creates pre-match features using recent team data
     """
     
-    def __init__(self, api_key=API_KEY):
-        self.api_key = api_key
+    def __init__(self, api_keys=API_KEYS):
+        self.api_keys = api_keys
+        self.current_key_index = 0
+        self.rate_limit_count = 0
         self.base_url = f"{BASE_URL}/{ACCESS_LEVEL}/{VERSION}/{LANGUAGE}"
         self.request_count = 0
         
@@ -79,13 +88,27 @@ class PreMatchFeatureEngine:
         self.team_recent_games = {}
         self.team_profiles = {}
         
+    def _get_current_api_key(self) -> str:
+        """Get the current active API key"""
+        return self.api_keys[self.current_key_index]
+    
+    def _switch_api_key(self) -> None:
+        """Switch to the next API key"""
+        if self.current_key_index < len(self.api_keys) - 1:
+            self.current_key_index += 1
+            self.rate_limit_count = 0
+            print(f"  Switching to API key {self.current_key_index + 1}/{len(self.api_keys)}")
+        else:
+            self.rate_limit_count = 0
+            print(f"  All API keys exhausted, resetting rate limit count")
+        
     def _get_team_alias(self, team_name: str) -> str:
         """Get team alias from team name using manual mapping"""
         return TEAM_ALIASES.get(team_name, 'UNK')
         
     def _make_request(self, endpoint: str, retries: int = 3) -> Optional[Dict]:
-        """Make API request with retry logic"""
-        url = f"{self.base_url}/{endpoint}?api_key={self.api_key}"
+        """Make API request with retry logic and API key rotation"""
+        url = f"{self.base_url}/{endpoint}?api_key={self._get_current_api_key()}"
         
         for attempt in range(retries):
             try:
@@ -94,11 +117,19 @@ class PreMatchFeatureEngine:
                 self.request_count += 1
                 
                 if response.status_code == 200:
+                    self.rate_limit_count = 0
                     time.sleep(REQUEST_DELAY)
                     return response.json()
                 elif response.status_code == 429:
+                    self.rate_limit_count += 1
+                    print(f"  Rate limit hit ({self.rate_limit_count}/{RATE_LIMIT_THRESHOLD})")
+                    
+                    if self.rate_limit_count >= RATE_LIMIT_THRESHOLD:
+                        self._switch_api_key()
+                        url = f"{self.base_url}/{endpoint}?api_key={self._get_current_api_key()}"
+                    
                     wait_time = 60 * (attempt + 1)
-                    print(f"  Rate limit. Waiting {wait_time}s...")
+                    print(f"  Waiting {wait_time}s...")
                     time.sleep(wait_time)
                     continue
                 elif response.status_code == 404:
@@ -121,7 +152,13 @@ class PreMatchFeatureEngine:
         return None
     
     def get_daily_schedule(self, date: datetime) -> Optional[Dict]:
-        """Get games for a specific date"""
+        """Get games for a specific date (expects datetime object, converts to UTC string)"""
+        # Convert to UTC if not already
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=timezone.utc)
+        else:
+            date = date.astimezone(timezone.utc)
+        
         date_str = date.strftime("%Y/%m/%d")
         endpoint = f"games/{date_str}/schedule.{FORMAT}"
         return self._make_request(endpoint)
@@ -152,12 +189,12 @@ class PreMatchFeatureEngine:
         endpoint = f"seasons/{year}/{season_type}/statistics.{FORMAT}"
         return self._make_request(endpoint)
     
-    def get_upcoming_games(self, days_ahead: int = 2) -> List[Dict]:
+    def get_upcoming_games(self, days_ahead: int = 1) -> List[Dict]:
         """
-        Get games for today and the next N days
+        Get games for today and the next N days (in UTC)
         
         Args:
-            days_ahead: Number of days to look ahead (default 2 = today + tomorrow)
+            days_ahead: Number of days to look ahead (default 1 = today + tomorrow in UTC)
         """
         print(f"\n{'='*60}")
         print(f"Fetching upcoming games (next {days_ahead} days)")
@@ -165,18 +202,26 @@ class PreMatchFeatureEngine:
         
         all_games = []
         
+        # Get current UTC time
+        utc_now = datetime.now(timezone.utc)
+        local_now = datetime.now()
+        
+        print(f"Current UTC time: {utc_now.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print(f"Your local time:  {local_now.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         for day_offset in range(days_ahead):
-            date = datetime.now() + timedelta(days=day_offset)
-            print(f"Checking {date.strftime('%Y-%m-%d')} ({date.strftime('%A')})...")
+            utc_date = utc_now + timedelta(days=day_offset)
+            date_str = utc_date.strftime("%Y-%m-%d")
+            print(f"Checking {date_str} UTC ({utc_date.strftime('%A')})...")
             
-            schedule = self.get_daily_schedule(date)
+            schedule = self.get_daily_schedule(utc_date)
             
             if schedule and 'games' in schedule:
                 games = schedule['games']
                 print(f"  Found {len(games)} games")
                 
                 for game in games:
-                    game['fetch_date'] = date.strftime('%Y-%m-%d')
+                    game['fetch_date'] = date_str
                     all_games.append(game)
             else:
                 print(f"  No games found")
@@ -470,7 +515,7 @@ class PreMatchFeatureEngine:
         
         return comparative
     
-    def process_upcoming_games(self, days_ahead: int = 2, recent_games_count: int = 5) -> List[Dict]:
+    def process_upcoming_games(self, days_ahead: int = 1, recent_games_count: int = 5) -> List[Dict]:
         """
         Main pipeline: Fetch upcoming games and enrich with features
         
@@ -483,6 +528,8 @@ class PreMatchFeatureEngine:
         print(f"{'='*60}")
         print(f"Looking ahead: {days_ahead} days")
         print(f"Recent games per team: {recent_games_count}")
+        print(f"API keys available: {len(self.api_keys)}")
+        print(f"Rate limit threshold: {RATE_LIMIT_THRESHOLD} consecutive hits")
         print(f"{'='*60}")
         
         # Get upcoming games
@@ -511,7 +558,7 @@ def main():
     
     # Configuration
     CONFIG = {
-        'days_ahead': 2,           # Today + tomorrow
+        'days_ahead': 1,           # Today + tomorrow
         'recent_games_count': 5,   # Last 5 games for each team
     }
     
@@ -589,7 +636,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
-
-
