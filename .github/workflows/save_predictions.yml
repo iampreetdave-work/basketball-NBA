@@ -1,0 +1,37 @@
+name: Daily NBA Predictions Save
+
+on:
+  schedule:
+    # Runs every day at 5:00 AM UTC
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  save_predictions:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install psycopg2-binary pandas
+      
+      - name: Run save.py
+        run: python save.py
+        env:
+          CSV_FILE: NBA_PREDICTIONS_ML.csv
+      
+      - name: Log success
+        if: success()
+        run: echo "✓ NBA predictions saved successfully at $(date)"
+      
+      - name: Log failure
+        if: failure()
+        run: echo "✗ Failed to save NBA predictions"
