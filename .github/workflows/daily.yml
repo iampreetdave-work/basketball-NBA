@@ -79,6 +79,36 @@ jobs:
             exit 1
           fi
       
+      - name: Verify trained models exist
+        run: |
+          echo "🤖 Checking trained models..."
+          if [ -d "model" ]; then
+            echo "✅ model/ folder found"
+            ls -lh model/
+            
+            required_files=("hybrid_home_xgb.pkl" "hybrid_away_xgb.pkl" "hybrid_scaler.pkl")
+            missing=0
+            for file in "${required_files[@]}"; do
+              if [ -f "model/$file" ]; then
+                echo "  ✅ $file"
+              else
+                echo "  ❌ $file MISSING"
+                missing=$((missing+1))
+              fi
+            done
+            
+            if [ $missing -gt 0 ]; then
+              echo ""
+              echo "❌ ERROR: Missing $missing model file(s)"
+              echo "Make sure these files are committed to your repo in the model/ folder"
+              exit 1
+            fi
+          else
+            echo "❌ ERROR: model/ folder not found in repo root"
+            echo "Please commit your trained models to: ./model/"
+            exit 1
+          fi
+      
       # ===== STEP 2: GENERATE PREDICTIONS =====
       - name: Step 4 - Generate model predictions
         run: |
@@ -89,24 +119,17 @@ jobs:
       - name: Verify prediction output
         run: |
           echo "📊 Checking prediction outputs:"
-          if [ -d "predictions_output" ]; then
-            ls -lh predictions_output/
-            echo ""
-            echo "✅ Prediction files generated"
+          if [ -f "NBA_PREDICTIONS.csv" ]; then
+            echo "✅ NBA_PREDICTIONS.csv generated"
+            echo "  Size: $(ls -lh NBA_PREDICTIONS.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l NBA_PREDICTIONS.csv)"
           else
-            echo "⚠️ predictions_output directory not found"
-          fi
-          
-          if [ -f "PREDICTIONS_LATEST.csv" ]; then
-            echo "✅ PREDICTIONS_LATEST.csv exists"
+            echo "❌ NBA_PREDICTIONS.csv not found"
           fi
       
       - name: Copy latest predictions to repo root
         run: |
-          echo "📋 Copying prediction files to root..."
-          cp predictions_output/PREDICTIONS_LATEST.csv ./ || echo "⚠️ PREDICTIONS_LATEST.csv not found"
-          cp predictions_output/HIGH_CONFIDENCE_PICKS.csv ./ || echo "⚠️ HIGH_CONFIDENCE_PICKS.csv not found"
-          cp predictions_output/SUMMARY_STATS.csv ./ || echo "⚠️ SUMMARY_STATS.csv not found"
+          echo "📋 Predictions already in root, preparing for commit..."
           
           echo "📁 Files ready for commit:"
           ls -lh *.csv 2>/dev/null || echo "No CSV files in root"
@@ -123,7 +146,7 @@ jobs:
           
           # Add generated CSV files
           echo "📁 Adding prediction files..."
-          git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv PREDICTIONS_LATEST.csv HIGH_CONFIDENCE_PICKS.csv SUMMARY_STATS.csv 2>/dev/null || echo "Adding available files"
+          git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv NBA_PREDICTIONS.csv 2>/dev/null || echo "Adding available files"
           
           # Check if there are changes
           if git diff --staged --quiet; then
@@ -171,7 +194,5 @@ jobs:
             nba_prematch_features.csv
             upcoming_nba_draftkings_odds.csv
             Future.csv
-            PREDICTIONS_LATEST.csv
-            HIGH_CONFIDENCE_PICKS.csv
-            SUMMARY_STATS.csv
+            NBA_PREDICTIONS.csv
           retention-days: 7
