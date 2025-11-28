@@ -64,6 +64,22 @@ def push_data():
         connection = psycopg2.connect(**DB_CONFIG)
         print("✓ Connected to database")
         
+        # Check if table exists, if not create it
+        with connection.cursor() as cursor:
+            cursor.execute(sql.SQL("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = %s
+                );
+            """), (TABLE_NAME,))
+            table_exists = cursor.fetchone()[0]
+            
+            if not table_exists:
+                print(f"✗ Table '{TABLE_NAME}' does not exist")
+                print("✓ Please create the table first in your database")
+                connection.close()
+                return
+        
         # Get existing game identifiers
         existing_identifiers = get_existing_game_identifiers(connection)
         
