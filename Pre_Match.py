@@ -189,7 +189,7 @@ class PreMatchFeatureEngine:
         endpoint = f"seasons/{year}/{season_type}/statistics.{FORMAT}"
         return self._make_request(endpoint)
     
-    def get_upcoming_games(self, days_ahead: int = 1) -> List[Dict]:
+    def get_upcoming_games(self, days_ahead: int = 2) -> List[Dict]:
         """
         Get games for today and the next N days (in UTC)
         
@@ -515,7 +515,7 @@ class PreMatchFeatureEngine:
         
         return comparative
     
-    def process_upcoming_games(self, days_ahead: int = 1, recent_games_count: int = 5) -> List[Dict]:
+    def process_upcoming_games(self, days_ahead: int = 2, recent_games_count: int = 5) -> List[Dict]:
         """
         Main pipeline: Fetch upcoming games and enrich with features
         
@@ -558,7 +558,7 @@ def main():
     
     # Configuration
     CONFIG = {
-        'days_ahead': 1,           # Today + tomorrow
+        'days_ahead': 2,           # Today + tomorrow
         'recent_games_count': 5,   # Last 5 games for each team
     }
     
@@ -637,3 +637,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
