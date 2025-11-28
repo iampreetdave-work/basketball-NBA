@@ -1,10 +1,11 @@
 id,date,league,game_identifier,home_id,home_team,away_id,away_team,home_points_predicted,home_points_actual,away_points_predicted,away_points_actual,total_points_predicted,total_points_actual,ml_prediction,ml_actual,ml_probability,home_win_odds,away_win_odds,ml_correct,ml_pnl,ml_confidence
-1,2025-11-26T22:00:00+00:00,NBA,2025-11-26_DET@BOS,nba_bos,Boston Celtics,nba_det,Detroit Pistons,113,,112,,225,,Home Win,,0.5552,2.3,1.65,,,21.82
-2,2025-11-27T00:00:00+00:00,NBA,2025-11-27_NY@CHA,nba_cha,Charlotte Hornets,nba_ny,New York Knicks,108,,115,,223,,Away Win,,0.2126,3.1,1.39,,,86.41
-3,2025-11-27T00:30:00+00:00,NBA,2025-11-27_MIN@OKC,nba_okc,Oklahoma City Thunder,nba_min,Minnesota Timberwolves,122,,122,,244,,Away Win,,0.4789,1.28,3.8,,,8.41
-4,2025-11-27T00:30:00+00:00,NBA,2025-11-27_MIL@MIA,nba_mia,Miami Heat,nba_mil,Milwaukee Bucks,131,,123,,254,,Home Win,,0.8402,1.31,3.6,,,93.02
-5,2025-11-27T00:30:00+00:00,NBA,2025-11-27_IND@TOR,nba_tor,Toronto Raptors,nba_ind,Indiana Pacers,119,,113,,232,,Home Win,,0.7662,1.21,4.7,,,82.97
-6,2025-11-27T01:00:00+00:00,NBA,2025-11-27_MEM@NO,nba_no,New Orleans Pelicans,nba_mem,Memphis Grizzlies,109,,110,,220,,Away Win,,0.4476,2.3,1.65,,,20.72
-7,2025-11-27T03:00:00+00:00,NBA,2025-11-27_SA@POR,nba_por,Portland Trail Blazers,nba_sa,San Antonio Spurs,114,,110,,225,,Home Win,,0.6979,1.83,2.0,,,68.45
-8,2025-11-27T03:00:00+00:00,NBA,2025-11-27_PHX@SAC,nba_sac,Sacramento Kings,nba_phx,Phoenix Suns,109,,105,,214,,Home Win,,0.6539,2.54,1.54,,,56.24
-9,2025-11-27T03:00:00+00:00,NBA,2025-11-27_HOU@GS,nba_gs,Golden State Warriors,nba_hou,Houston Rockets,115,,110,,225,,Home Win,,0.7119,1.74,2.14,,,71.85
+1,2025-11-29T00:30:00+00:00,NBA,2025-11-29_WSH@IND,nba_ind,Indiana Pacers,nba_wsh,Washington Wizards,116,,108,,223,,Home Win,,0.824,1.39,3.1,,,91.28
+2,2025-11-29T00:30:00+00:00,NBA,2025-11-29_CHI@CHA,nba_cha,Charlotte Hornets,nba_chi,Chicago Bulls,110,,105,,215,,Home Win,,0.7527,2.14,1.74,,,80.51
+3,2025-11-29T00:30:00+00:00,NBA,2025-11-29_PHI@BKN,nba_bkn,Brooklyn Nets,nba_phi,Philadelphia 76ers,107,,113,,219,,Away Win,,0.2401,3.3,1.35,,,81.84
+4,2025-11-29T00:30:00+00:00,NBA,2025-11-29_CLE@ATL,nba_atl,Atlanta Hawks,nba_cle,Cleveland Cavaliers,118,,120,,238,,Away Win,,0.4272,2.8,1.46,,,28.53
+5,2025-11-29T00:30:00+00:00,NBA,2025-11-29_ORL@DET,nba_det,Detroit Pistons,nba_orl,Orlando Magic,112,,112,,224,,Away Win,,0.49,1.65,2.3,,,3.99
+6,2025-11-29T00:30:00+00:00,NBA,2025-11-29_MIL@NY,nba_ny,New York Knicks,nba_mil,Milwaukee Bucks,124,,113,,237,,Home Win,,0.8831,1.34,3.4,,,96.56
+7,2025-11-29T02:30:00+00:00,NBA,2025-11-29_PHX@OKC,nba_okc,Oklahoma City Thunder,nba_phx,Phoenix Suns,130,,103,,232,,Home Win,,0.9954,1.1,7.75,,,100.0
+8,2025-11-29T02:30:00+00:00,NBA,2025-11-29_SAC@UTAH,nba_utah,Utah Jazz,nba_sac,Sacramento Kings,114,,117,,231,,Away Win,,0.3847,1.83,2.0,,,43.78
+9,2025-11-29T02:30:00+00:00,NBA,2025-11-29_SA@DEN,nba_den,Denver Nuggets,nba_sa,San Antonio Spurs,122,,106,,228,,Home Win,,0.9553,1.28,3.85,,,99.56
+10,2025-11-29T03:00:00+00:00,NBA,2025-11-29_DAL@LAL,nba_lal,Los Angeles Lakers,nba_dal,Dallas Mavericks,113,,104,,218,,Home Win,,0.8558,1.21,4.7,,,94.48
