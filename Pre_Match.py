@@ -56,11 +56,11 @@ TEAM_ALIASES = {
 
 # API Configuration
 API_KEYS = [
-#    "jdP3cFD34Ox128KeOzk1QO80WKPYoh8ZKzjLeL0H",
+    "jdP3cFD34Ox128KeOzk1QO80WKPYoh8ZKzjLeL0H",
 #    "yaVs9ag9ZV7B011YWcbOFuszgN5bdeTai5r8eVWi",
 #    "7iXdsTMLsQpiFV6f1aWUak0BOoYrmuAf4YD99oVE",
-    "dfgSQXX31W4efJ2Nqq71E35eVbtRBth8BYtHRYPc"
-#   "6vTdojNKZXdXhLLN9XgqlqqfXC87g3L3EoagQVAi"
+#    "dfgSQXX31W4efJ2Nqq71E35eVbtRBth8BYtHRYPc",
+    "6vTdojNKZXdXhLLN9XgqlqqfXC87g3L3EoagQVAi"
 ]
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
@@ -110,11 +110,15 @@ class PreMatchFeatureEngine:
         """Make API request with retry logic and API key rotation"""
         url = f"{self.base_url}/{endpoint}?api_key={self._get_current_api_key()}"
         
-        for attempt in range(retries):
+        total_attempts = 0
+        max_total_attempts = 50
+        
+        while total_attempts < max_total_attempts:
             try:
                 print(f"  Fetching: {endpoint[:70]}...")
                 response = requests.get(url, timeout=30)
                 self.request_count += 1
+                total_attempts += 1
                 
                 if response.status_code == 200:
                     self.rate_limit_count = 0
@@ -127,27 +131,21 @@ class PreMatchFeatureEngine:
                     if self.rate_limit_count >= RATE_LIMIT_THRESHOLD:
                         self._switch_api_key()
                         url = f"{self.base_url}/{endpoint}?api_key={self._get_current_api_key()}"
+                        self.rate_limit_count = 0
                     
-                    wait_time = 60 * (attempt + 1)
-                    print(f"  Waiting {wait_time}s...")
-                    time.sleep(wait_time)
                     continue
                 elif response.status_code == 404:
                     print(f"  Not found (404)")
                     return None
                 else:
                     print(f"  Error {response.status_code}")
-                    if attempt < retries - 1:
-                        time.sleep(5)
-                        continue
-                    return None
+                    time.sleep(5)
+                    continue
                     
             except Exception as e:
                 print(f"  Request failed: {e}")
-                if attempt < retries - 1:
-                    time.sleep(5)
-                    continue
-                return None
+                time.sleep(5)
+                continue
         
         return None
     
@@ -189,7 +187,7 @@ class PreMatchFeatureEngine:
         endpoint = f"seasons/{year}/{season_type}/statistics.{FORMAT}"
         return self._make_request(endpoint)
     
-    def get_upcoming_games(self, days_ahead: int = 2) -> List[Dict]:
+    def get_upcoming_games(self, days_ahead: int = 1) -> List[Dict]:
         """
         Get games for today and the next N days (in UTC)
         
@@ -515,7 +513,7 @@ class PreMatchFeatureEngine:
         
         return comparative
     
-    def process_upcoming_games(self, days_ahead: int = 2, recent_games_count: int = 5) -> List[Dict]:
+    def process_upcoming_games(self, days_ahead: int = 1, recent_games_count: int = 5) -> List[Dict]:
         """
         Main pipeline: Fetch upcoming games and enrich with features
         
@@ -558,7 +556,7 @@ def main():
     
     # Configuration
     CONFIG = {
-        'days_ahead': 2,           # Today + tomorrow
+        'days_ahead': 1,           # Today + tomorrow
         'recent_games_count': 5,   # Last 5 games for each team
     }
     
@@ -637,5 +635,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
