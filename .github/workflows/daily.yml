@@ -48,11 +48,35 @@ jobs:
           python Pre_Match.py
         continue-on-error: false
       
+      - name: Verify nba_prematch_features.csv
+        run: |
+          echo "✅ Checking nba_prematch_features.csv..."
+          if [ -f "nba_prematch_features.csv" ]; then
+            echo "  ✅ Generated successfully"
+            echo "  Size: $(ls -lh nba_prematch_features.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l nba_prematch_features.csv)"
+          else
+            echo "  ❌ ERROR: nba_prematch_features.csv not found!"
+            exit 1
+          fi
+      
       - name: Step 2 - Extract odds and features
         run: |
           echo "📊 Extracting DraftKings odds and features..."
           python Odds_Pre_Match.py
         continue-on-error: false
+      
+      - name: Verify upcoming_nba_draftkings_odds.csv
+        run: |
+          echo "✅ Checking upcoming_nba_draftkings_odds.csv..."
+          if [ -f "upcoming_nba_draftkings_odds.csv" ]; then
+            echo "  ✅ Generated successfully"
+            echo "  Size: $(ls -lh upcoming_nba_draftkings_odds.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l upcoming_nba_draftkings_odds.csv)"
+          else
+            echo "  ❌ ERROR: upcoming_nba_draftkings_odds.csv not found!"
+            exit 1
+          fi
       
       - name: Step 3 - Generate Future.csv (Combine data)
         run: |
@@ -72,8 +96,8 @@ jobs:
           echo ""
           if [ -f "Future.csv" ]; then
             echo "✅ Future.csv generated successfully"
-            echo "File size: $(ls -lh Future.csv | awk '{print $5}')"
-            echo "Lines: $(wc -l Future.csv)"
+            echo "  Size: $(ls -lh Future.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l Future.csv)"
           else
             echo "❌ ERROR: Future.csv not found!"
             exit 1
@@ -113,26 +137,36 @@ jobs:
       - name: Step 4 - Generate model predictions
         run: |
           echo "🚀 Running ML predictions..."
+          echo "📥 Input file: Future.csv"
           python predict.py
         continue-on-error: false
       
-      - name: Verify prediction output
+      - name: Verify prediction output - NBA_PREDICTIONS_ML.csv
         run: |
-          echo "📊 Checking prediction outputs:"
+          echo "📊 Verifying prediction outputs after predict.py execution..."
+          echo ""
           if [ -f "NBA_PREDICTIONS_ML.csv" ]; then
-            echo "✅ NBA_PREDICTIONS_ML.csv generated"
+            echo "✅ NBA_PREDICTIONS_ML.csv generated successfully"
             echo "  Size: $(ls -lh NBA_PREDICTIONS_ML.csv | awk '{print $5}')"
             echo "  Lines: $(wc -l NBA_PREDICTIONS_ML.csv)"
+            echo "  Modified: $(stat -c '%y' NBA_PREDICTIONS_ML.csv)"
           else
-            echo "❌ NBA_PREDICTIONS_ML.csv not found"
+            echo "❌ ERROR: NBA_PREDICTIONS_ML.csv not found!"
+            echo "predict.py did not generate the output file"
+            exit 1
           fi
       
-      - name: Copy latest predictions to repo root
+      - name: Display all generated files
         run: |
-          echo "📋 Predictions already in root, preparing for commit..."
-          
-          echo "📁 Files ready for commit:"
-          ls -lh *.csv 2>/dev/null || echo "No CSV files in root"
+          echo "📁 All generated CSV files for this run:"
+          echo ""
+          ls -lh *.csv 2>/dev/null | awk '{print $9, "(" $5 ")"}'
+          echo ""
+          echo "✅ All files generated in correct sequence:"
+          echo "  1. nba_prematch_features.csv (Pre_Match.py)"
+          echo "  2. upcoming_nba_draftkings_odds.csv (Odds_Pre_Match.py)"
+          echo "  3. Future.csv (Combine.py)"
+          echo "  4. NBA_PREDICTIONS_ML.csv (predict.py)"
       
       # ===== STEP 3: COMMIT & PUSH =====
       - name: Commit and push results
@@ -144,9 +178,12 @@ jobs:
           echo "🔄 Syncing with remote..."
           git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null || echo "Already up to date"
           
-          # Add generated CSV files
+          # Add generated CSV files in order
           echo "📁 Adding prediction files..."
-          git add -f nba_prematch_features.csv upcoming_nba_draftkings_odds.csv Future.csv NBA_PREDICTIONS_ML.csv 2>/dev/null || echo "Adding available files"
+          git add -f nba_prematch_features.csv 2>/dev/null || echo "nba_prematch_features.csv not found"
+          git add -f upcoming_nba_draftkings_odds.csv 2>/dev/null || echo "upcoming_nba_draftkings_odds.csv not found"
+          git add -f Future.csv 2>/dev/null || echo "Future.csv not found"
+          git add -f NBA_PREDICTIONS_ML.csv 2>/dev/null || echo "NBA_PREDICTIONS_ML.csv not found"
           
           # Check if there are changes
           if git diff --staged --quiet; then
