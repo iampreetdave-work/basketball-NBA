@@ -28,7 +28,7 @@ jobs:
       
       - name: Run NBA Validation Script
         run: |
-          python nba_validation_working.py
+          python validation.py
       
       - name: Commit and push results
         run: |
