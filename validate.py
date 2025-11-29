@@ -332,7 +332,7 @@ def main():
     
     # Save results
     if validated > 0:
-        output_file = f"nba_validation_results.csv"
+        output_file = f"NBA_Validation.csv"
         # Remove match_id from output
         df_to_save = df_results.drop(columns=['match_id'], errors='ignore')
         df_to_save.to_csv(output_file, index=False)
