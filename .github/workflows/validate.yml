@@ -6,6 +6,10 @@ on:
   
   # Allow manual trigger
   workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -28,25 +32,29 @@ jobs:
       
       - name: Run NBA Validation Script
         run: |
+          ls -la  # Debug: show files in root
           python validate.py
+          ls -la  # Debug: show files after running script
       
       - name: Commit and push results
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git config --local user.password ${{ secrets.GITHUB_TOKEN }}
           
-          # Check if any CSV files were created
-          if ls nba_validation_results_*.csv 1> /dev/null 2>&1; then
-            # Add all validation result CSVs
-            git add nba_validation_results_*.csv
-            
-            # Commit without timestamp
+          # Debug: Check what CSV files exist
+          echo "CSV files found:"
+          ls -la *.csv 2>/dev/null || echo "No CSV files found"
+          
+          # Add the validation CSV
+          if git add NBA_Validation.csv 2>/dev/null; then
+            # Commit the changes
             git commit -m "📊 NBA Validation Results" || echo "No changes to commit"
             
-            # Push to main branch
-            git push origin main
+            # Push to the current branch
+            git push origin HEAD:main
             
-            echo "✓ Results committed and pushed"
+            echo "✓ Results committed and pushed successfully"
           else
             echo "⚠️ No validation results to commit"
           fi
