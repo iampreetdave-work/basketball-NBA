@@ -351,9 +351,9 @@ def assign_grade(confidence, grade_type='ml'):
         elif confidence >= 50 and confidence < 80:
             return 'B'
         elif confidence >= 35 and confidence < 50:
-            return 'C'
-        else:
             return 'D'
+        else:
+            return 'C'
     return 'D'
 
 # Apply grading to all three columns
@@ -533,3 +533,4 @@ if 'ou_actual' in results_df.columns:
 
 print(results_df[display_cols].head(10).to_string(index=False))
 print("-"*80)
+
