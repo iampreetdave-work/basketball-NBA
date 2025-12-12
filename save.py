@@ -1,7 +1,6 @@
 import psycopg2
 import pandas as pd
 from psycopg2 import sql
-
 # Database configuration
 DB_CONFIG = {
     'host': 'winbets-predictions.postgres.database.azure.com',
@@ -10,10 +9,8 @@ DB_CONFIG = {
     'user': 'winbets',
     'password': 'Constantinople@1900'
 }
-
 TABLE_NAME = 'agility_nba_b1'
 CSV_FILE = 'NBA_PREDICTIONS_ML.csv'
-
 # All columns from generated CSV (excluding id)
 CSV_COLUMNS = [
     'date',
@@ -55,13 +52,11 @@ CSV_COLUMNS = [
     'spread_covered_predicted',
     'spread_covered_actual'
 ]
-
 # Column mapping: CSV column -> Database column
 # Since CSV and database use same names, no mapping needed (1:1)
 COLUMN_MAPPING = {
     # CSV_column: database_column (same for all - direct mapping)
 }
-
 def push_data():
     """Read CSV and push all columns to database"""
     try:
@@ -80,8 +75,25 @@ def push_data():
         print("✓ Connected to database")
         
         # Insert data
+        inserted_count = 0
+        skipped_count = 0
+        
         with connection.cursor() as cursor:
             for index, row in df.iterrows():
+                game_id = row['game_identifier']
+                
+                # Check if game_identifier already exists
+                cursor.execute(
+                    f"SELECT COUNT(*) FROM {TABLE_NAME} WHERE game_identifier = %s",
+                    (game_id,)
+                )
+                exists = cursor.fetchone()[0] > 0
+                
+                if exists:
+                    print(f"  ⊘ Skipping (already exists): {game_id}")
+                    skipped_count += 1
+                    continue
+                
                 # Map CSV column names to database column names (direct mapping - same names)
                 db_columns = [COLUMN_MAPPING.get(col, col) for col in CSV_COLUMNS]
                 
@@ -101,9 +113,11 @@ def push_data():
                 )
                 
                 cursor.execute(insert_query, values)
+                inserted_count += 1
         
         connection.commit()
-        print(f"✓ Inserted {len(df)} rows into '{TABLE_NAME}'")
+        print(f"\n✓ Inserted {inserted_count} new rows into '{TABLE_NAME}'")
+        print(f"✓ Skipped {skipped_count} duplicate rows")
         
         # Verify
         with connection.cursor() as cursor:
@@ -127,6 +141,5 @@ def push_data():
     except Exception as e:
         print(f"✗ Fatal error: {e}")
         raise
-
 if __name__ == "__main__":
     push_data()
