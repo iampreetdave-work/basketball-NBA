@@ -1,7 +1,8 @@
 """
-Fetch DraftKings Decimal Odds for UPCOMING NBA Matches
+Fetch DraftKings (or FanDuel fallback) Decimal Odds for UPCOMING NBA Matches
 Uses The Odds API v4
 Extracts Spreads and Totals with proper structure
+Falls back to FanDuel if DraftKings unavailable
 """
 
 import requests
@@ -83,9 +84,9 @@ class OddsAPIClient:
             print(f"  All API keys exhausted, resetting rate limit count")
     
     def get_upcoming_nba_odds(self):
-        """Fetch upcoming NBA games with DraftKings odds"""
+        """Fetch upcoming NBA games with odds"""
         print(f"\n{'='*80}")
-        print(f"FETCHING UPCOMING NBA GAMES WITH DRAFTKINGS ODDS")
+        print(f"FETCHING UPCOMING NBA GAMES WITH ODDS")
         print(f"{'='*80}\n")
         
         endpoint = f"{BASE_URL}/sports/{SPORT}/odds"
@@ -94,7 +95,7 @@ class OddsAPIClient:
             "regions": "us",
             "markets": "h2h,spreads,totals",
             "oddsFormat": "decimal",
-            "bookmakers": "draftkings"
+            "bookmakers": "draftkings,fanduel"
         }
         
         try:
@@ -134,12 +135,17 @@ class OddsAPIClient:
 
 
 def extract_draftkings_odds(games):
-    """Extract DraftKings decimal odds and spreads from games"""
+    """
+    Extract DraftKings decimal odds and spreads from games
+    Falls back to FanDuel if DraftKings not available
+    """
     print(f"{'='*80}")
-    print(f"EXTRACTING DRAFTKINGS ODDS & SPREADS")
+    print(f"EXTRACTING ODDS & SPREADS (DraftKings preferred, FanDuel fallback)")
     print(f"{'='*80}\n")
     
     odds_list = []
+    draftkings_count = 0
+    fanduel_count = 0
     
     for game in games:
         # Parse date from commence_time
@@ -158,6 +164,7 @@ def extract_draftkings_odds(games):
             'home_team': home_team,
             'away_team': away_team,
             'status': 'upcoming',
+            'bookmaker_used': None,  # Track which bookmaker was used
             'home_spread': None,
             'away_spread': None,
             'home_spread_odds_decimal': None,
@@ -167,20 +174,38 @@ def extract_draftkings_odds(games):
             'total_line_under_odds_decimal': None,
         }
         
-        # Find DraftKings bookmaker
+        # Find DraftKings bookmaker (preferred), fallback to FanDuel
         bookmakers = game.get('bookmakers', [])
-        draftkings_data = None
+        selected_bookmaker = None
+        bookmaker_key = None
         
+        # Try DraftKings first
         for bookmaker in bookmakers:
             if bookmaker.get('key') == 'draftkings':
-                draftkings_data = bookmaker
+                selected_bookmaker = bookmaker
+                bookmaker_key = 'draftkings'
                 break
         
-        if not draftkings_data:
+        # Fallback to FanDuel if DraftKings not available
+        if not selected_bookmaker:
+            for bookmaker in bookmakers:
+                if bookmaker.get('key') == 'fanduel':
+                    selected_bookmaker = bookmaker
+                    bookmaker_key = 'fanduel'
+                    break
+        
+        # Skip only if neither DraftKings nor FanDuel available
+        if not selected_bookmaker:
             continue
         
-        # Extract markets
-        markets = draftkings_data.get('markets', [])
+        game_odds['bookmaker_used'] = bookmaker_key
+        if bookmaker_key == 'draftkings':
+            draftkings_count += 1
+        else:
+            fanduel_count += 1
+        
+        # Extract markets from selected bookmaker
+        markets = selected_bookmaker.get('markets', [])
         
         for market in markets:
             market_key = market.get('key')
@@ -225,16 +250,19 @@ def extract_draftkings_odds(games):
                     elif name == 'Under' and odds_decimal:
                         game_odds['total_line_under_odds_decimal'] = odds_decimal
         
-        if draftkings_data:  # Has DraftKings data
+        if selected_bookmaker:  # Has selected bookmaker data (DK or FD)
             odds_list.append(game_odds)
     
-    print(f"✓ Extracted {len(odds_list)} games with DraftKings odds\n")
+    print(f"✓ Extracted {len(odds_list)} games")
+    print(f"  - DraftKings: {draftkings_count}")
+    print(f"  - FanDuel (fallback): {fanduel_count}\n")
     return odds_list
 
 
 def main():
     print("\n" + "="*80)
-    print("THE ODDS API - UPCOMING NBA DRAFTKINGS ODDS & SPREADS")
+    print("THE ODDS API - UPCOMING NBA ODDS & SPREADS")
+    print("(DraftKings preferred, FanDuel fallback)")
     print("="*80)
     print(f"API keys available: {len(API_KEYS)}")
     print(f"Rate limit threshold: {RATE_LIMIT_THRESHOLD} consecutive hits")
@@ -249,11 +277,11 @@ def main():
         print("\n✗ No games found")
         return
     
-    # Step 2: Extract DraftKings odds
+    # Step 2: Extract odds (with fallback)
     odds_list = extract_draftkings_odds(games)
     
     if not odds_list:
-        print("\n✗ No DraftKings odds found")
+        print("\n✗ No games found with DraftKings or FanDuel odds")
         return
     
     # Step 3: Create DataFrame and save
@@ -275,7 +303,7 @@ def main():
             df_odds[col] = pd.to_numeric(df_odds[col], errors='coerce')
     
     current_dir = os.getcwd()
-    output_file = os.path.join(current_dir, "upcoming_nba_draftkings_odds.csv")
+    output_file = os.path.join(current_dir, "upcoming_nba_odds.csv")
     
     df_odds.to_csv(output_file, index=False)
     print(f"✓ Saved: {output_file}")
@@ -288,7 +316,7 @@ def main():
     print(f"{'='*80}\n")
     
     sample_cols = [
-        'game_identifier', 'date',
+        'game_identifier', 'date', 'bookmaker_used',
         'home_team', 'away_team',
         'home_spread', 'home_spread_odds_decimal',
         'away_spread', 'away_spread_odds_decimal',
@@ -298,14 +326,22 @@ def main():
     available_cols = [c for c in sample_cols if c in df_odds.columns]
     
     if available_cols:
-        print(df_odds[available_cols].to_string(index=False))
+        print(df_odds[available_cols].head(5).to_string(index=False))
     
     # Step 5: Statistics
     print(f"\n{'='*80}")
     print("STATISTICS")
     print(f"{'='*80}\n")
     
-    print(f"Total upcoming NBA games with DraftKings odds: {len(df_odds)}")
+    print(f"Total upcoming NBA games with odds: {len(df_odds)}")
+    
+    # Bookmaker distribution
+    if 'bookmaker_used' in df_odds.columns:
+        bm_counts = df_odds['bookmaker_used'].value_counts()
+        print(f"\nBookmaker distribution:")
+        for bm, count in bm_counts.items():
+            print(f"  {bm.title()}: {count}")
+    
     print(f"\nOdds availability:")
     print(f"  Home spread_odds_decimal: {df_odds['home_spread_odds_decimal'].notna().sum()}")
     print(f"  Away spread_odds_decimal: {df_odds['away_spread_odds_decimal'].notna().sum()}")
@@ -323,6 +359,7 @@ def main():
     print(f"\n{'='*80}")
     print("✓ COLUMNS EXTRACTED:")
     print(f"{'='*80}")
+    print("✓ bookmaker_used                     - Source bookmaker (draftkings/fanduel)")
     print("✓ home_spread                        - Home team spread points")
     print("✓ away_spread                        - Away team spread points")
     print("✓ home_spread_odds_decimal           - Home team spread price (decimal odds)")
@@ -335,4 +372,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
