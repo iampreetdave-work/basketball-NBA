@@ -29,6 +29,12 @@ jobs:
           pip install -r requirements.txt
       
       - name: Run NBA Validation Script
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           ls -la  # Debug: show files in root
           python validate.py
