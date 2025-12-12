@@ -1,5 +1,4 @@
 name: Daily NBA Predictions Save
-
 on:
   schedule:
     # Runs every day at 7:00 AM UTC
@@ -24,9 +23,14 @@ jobs:
           pip install psycopg2-binary pandas
       
       - name: Run save.py
-        run: python save.py
         env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           CSV_FILE: NBA_PREDICTIONS_ML.csv
+        run: python save.py
       
       - name: Log success
         if: success()
