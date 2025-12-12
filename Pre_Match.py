@@ -163,7 +163,7 @@ class PreMatchFeatureEngine:
         endpoint = f"games/{date_str}/schedule.{FORMAT}"
         return self._make_request(endpoint)
     
-    def get_season_schedule(self, year: int = 2024, season_type: str = "REG") -> Optional[Dict]:
+    def get_season_schedule(self, year: int = 2025, season_type: str = "REG") -> Optional[Dict]:
         """Get full season schedule"""
         endpoint = f"games/{year}/{season_type}/schedule.{FORMAT}"
         return self._make_request(endpoint)
@@ -184,7 +184,7 @@ class PreMatchFeatureEngine:
             self.team_profiles[team_id] = profile
         return profile
     
-    def get_seasonal_statistics(self, year: int = 2024, season_type: str = "REG") -> Optional[Dict]:
+    def get_seasonal_statistics(self, year: int = 2025, season_type: str = "REG") -> Optional[Dict]:
         """Get seasonal statistics for all teams"""
         endpoint = f"seasons/{year}/{season_type}/statistics.{FORMAT}"
         return self._make_request(endpoint)
@@ -229,7 +229,7 @@ class PreMatchFeatureEngine:
         return all_games
     
     def get_team_recent_games(self, team_id: str, num_games: int = 5, 
-                             year: int = 2024, season_type: str = "REG") -> List[Dict]:
+                             year: int = 2025, season_type: str = "REG") -> List[Dict]:
         """
         Get recent completed games for a team
         
@@ -628,7 +628,7 @@ def main():
     print("NOTES")
     print(f"{'='*60}")
     print("1. game_identifier can be used to match with odds data")
-    print("   Format: DATE_AWAY@HOME (e.g., 2024-11-04_BOS@LAL)")
+    print("   Format: DATE_AWAY@HOME (e.g., 2025-11-04_BOS@LAL)")
     print("\n2. For odds matching, use this identifier instead of API IDs")
     print("\n3. All recent_* features are from last N games")
     print("\n4. Comparative features show home team advantage")
@@ -637,3 +637,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
