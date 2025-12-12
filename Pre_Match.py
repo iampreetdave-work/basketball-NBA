@@ -1,31 +1,25 @@
 """
-Fetch DraftKings (or FanDuel fallback) Decimal Odds for UPCOMING NBA Matches
-Uses The Odds API v4
-Extracts Spreads and Totals with proper structure
-Falls back to FanDuel if DraftKings unavailable
-"""
+NBA Pre-Match Feature Engineering
+Fetches upcoming games and enriches them with recent team performance data
 
+Features included:
+- Today's and tomorrow's games
+- Recent team statistics (last N games)
+- Home/away splits
+- Team season averages
+- Head-to-head history
+- Form metrics (win streaks, scoring trends)
+- Pre-match features for ML models
+"""
 import requests
 import pandas as pd
-from datetime import datetime
-import os
+import numpy as np
+import time
+from datetime import datetime, timedelta, timezone
+from typing import List, Dict, Optional, Tuple
+from collections import defaultdict
 
-# ============================================================================
-# THE ODDS API CONFIGURATION
-# ============================================================================
-
-API_KEYS = [
-    "83dcdaff13977e39bc65141046c993f3",
-    "02a80c14ece71bed354b63915e3fb8b3",
-    "30d78032b75c0922de70de22f0337b91",
-    "8972d0f8f1c909b2791607ed1a29d6a5",
-    "7483e0df3726e14cdb152f580291f47d"
-]
-BASE_URL = "https://api.the-odds-api.com/v4"
-SPORT = "basketball_nba"
-RATE_LIMIT_THRESHOLD = 5
-
-# Team name to alias mapping
+# Team Aliases Mapping
 TEAM_ALIASES = {
     "Atlanta Hawks": "ATL",
     "Boston Celtics": "BOS",
@@ -39,7 +33,7 @@ TEAM_ALIASES = {
     "Golden State Warriors": "GS",
     "Houston Rockets": "HOU",
     "Indiana Pacers": "IND",
-    "Los Angeles Clippers": "LAC",
+    "LA Clippers": "LAC",
     "LA Lakers": "LAL",
     "Los Angeles Lakers": "LAL",
     "Memphis Grizzlies": "MEM",
@@ -60,15 +54,40 @@ TEAM_ALIASES = {
     "Washington Wizards": "WSH",
 }
 
+# API Configuration
+API_KEYS = [
+    "KpM5Xwq2VXtvJEKFYFAtpFpAAoQEzSJVeQQnx9d4",
+    "yaVs9ag9ZV7B011YWcbOFuszgN5bdeTai5r8eVWi",
+    "7iXdsTMLsQpiFV6f1aWUak0BOoYrmuAf4YD99oVE",
+    "dfgSQXX31W4efJ2Nqq71E35eVbtRBth8BYtHRYPc",
+    "6vTdojNKZXdXhLLN9XgqlqqfXC87g3L3EoagQVAi"
+]
+BASE_URL = "https://api.sportradar.us/nba"
+ACCESS_LEVEL = "trial"
+VERSION = "v8"
+LANGUAGE = "en"
+FORMAT = "json"
+REQUEST_DELAY = 1.5
+RATE_LIMIT_THRESHOLD = 5
 
-class OddsAPIClient:
-    """Client for The Odds API with multi-key support"""
+
+class PreMatchFeatureEngine:
+    """
+    Fetches upcoming games and creates pre-match features using recent team data
+    """
     
     def __init__(self, api_keys=API_KEYS):
         self.api_keys = api_keys
         self.current_key_index = 0
         self.rate_limit_count = 0
-    
+        self.base_url = f"{BASE_URL}/{ACCESS_LEVEL}/{VERSION}/{LANGUAGE}"
+        self.request_count = 0
+        
+        # Cache for team data
+        self.team_season_stats = {}
+        self.team_recent_games = {}
+        self.team_profiles = {}
+        
     def _get_current_api_key(self) -> str:
         """Get the current active API key"""
         return self.api_keys[self.current_key_index]
@@ -82,292 +101,538 @@ class OddsAPIClient:
         else:
             self.rate_limit_count = 0
             print(f"  All API keys exhausted, resetting rate limit count")
-    
-    def get_upcoming_nba_odds(self):
-        """Fetch upcoming NBA games with odds"""
-        print(f"\n{'='*80}")
-        print(f"FETCHING UPCOMING NBA GAMES WITH ODDS")
-        print(f"{'='*80}\n")
         
-        endpoint = f"{BASE_URL}/sports/{SPORT}/odds"
-        params = {
-            "apiKey": self._get_current_api_key(),
-            "regions": "us",
-            "markets": "h2h,spreads,totals",
-            "oddsFormat": "decimal",
-            "bookmakers": "draftkings,fanduel"
-        }
+    def _get_team_alias(self, team_name: str) -> str:
+        """Get team alias from team name using manual mapping"""
+        return TEAM_ALIASES.get(team_name, 'UNK')
         
-        try:
-            print(f"Calling API...", flush=True)
-            response = requests.get(endpoint, params=params, timeout=30)
-            
-            if response.status_code == 200:
-                self.rate_limit_count = 0
-                data = response.json()
-                print(f"✓ Found {len(data)} games\n")
-                return data
-            elif response.status_code == 429:
-                self.rate_limit_count += 1
-                print(f"  Rate limit hit ({self.rate_limit_count}/{RATE_LIMIT_THRESHOLD})")
+    def _make_request(self, endpoint: str, retries: int = 3) -> Optional[Dict]:
+        """Make API request with retry logic and API key rotation"""
+        url = f"{self.base_url}/{endpoint}?api_key={self._get_current_api_key()}"
+        
+        for attempt in range(retries):
+            try:
+                print(f"  Fetching: {endpoint[:70]}...")
+                response = requests.get(url, timeout=30)
+                self.request_count += 1
                 
-                if self.rate_limit_count >= RATE_LIMIT_THRESHOLD:
-                    self._switch_api_key()
-                    print("  Retrying with new API key...")
-                    params["apiKey"] = self._get_current_api_key()
-                    response = requests.get(endpoint, params=params, timeout=30)
+                if response.status_code == 200:
+                    self.rate_limit_count = 0
+                    time.sleep(REQUEST_DELAY)
+                    return response.json()
+                elif response.status_code == 429:
+                    self.rate_limit_count += 1
+                    print(f"  Rate limit hit ({self.rate_limit_count}/{RATE_LIMIT_THRESHOLD})")
                     
-                    if response.status_code == 200:
-                        self.rate_limit_count = 0
-                        data = response.json()
-                        print(f"✓ Found {len(data)} games\n")
-                        return data
-                
-                print("✗ RATE LIMIT - Please wait and try again")
+                    if self.rate_limit_count >= RATE_LIMIT_THRESHOLD:
+                        self._switch_api_key()
+                        url = f"{self.base_url}/{endpoint}?api_key={self._get_current_api_key()}"
+                    
+                    wait_time = 60 * (attempt + 1)
+                    print(f"  Waiting {wait_time}s...")
+                    time.sleep(wait_time)
+                    continue
+                elif response.status_code == 404:
+                    print(f"  Not found (404)")
+                    return None
+                else:
+                    print(f"  Error {response.status_code}")
+                    if attempt < retries - 1:
+                        time.sleep(5)
+                        continue
+                    return None
+                    
+            except Exception as e:
+                print(f"  Request failed: {e}")
+                if attempt < retries - 1:
+                    time.sleep(5)
+                    continue
                 return None
-            else:
-                print(f"✗ Error {response.status_code}: {response.text}")
-                return None
-                
-        except Exception as e:
-            print(f"✗ Exception: {e}")
-            return None
-
-
-def extract_draftkings_odds(games):
-    """
-    Extract DraftKings decimal odds and spreads from games
-    Falls back to FanDuel if DraftKings not available
-    """
-    print(f"{'='*80}")
-    print(f"EXTRACTING ODDS & SPREADS (DraftKings preferred, FanDuel fallback)")
-    print(f"{'='*80}\n")
+        
+        return None
     
-    odds_list = []
-    draftkings_count = 0
-    fanduel_count = 0
-    
-    for game in games:
-        # Parse date from commence_time
-        commence_time = game.get('commence_time', '')
-        date = commence_time.split('T')[0] if commence_time else 'N/A'
-        
-        home_team = game.get('home_team', 'Unknown')
-        away_team = game.get('away_team', 'Unknown')
-        
-        game_id = f"{date}_{TEAM_ALIASES.get(away_team, away_team[:3].upper())}@{TEAM_ALIASES.get(home_team, home_team[:3].upper())}"
-        
-        game_odds = {
-            'game_identifier': game_id,
-            'date': date,
-            'start_time': commence_time,
-            'home_team': home_team,
-            'away_team': away_team,
-            'status': 'upcoming',
-            'bookmaker_used': None,  # Track which bookmaker was used
-            'home_spread': None,
-            'away_spread': None,
-            'home_spread_odds_decimal': None,
-            'away_spread_odds_decimal': None,
-            'total_line_o': None,
-            'total_line_over_odds_decimal': None,
-            'total_line_under_odds_decimal': None,
-        }
-        
-        # Find DraftKings bookmaker (preferred), fallback to FanDuel
-        bookmakers = game.get('bookmakers', [])
-        selected_bookmaker = None
-        bookmaker_key = None
-        
-        # Try DraftKings first
-        for bookmaker in bookmakers:
-            if bookmaker.get('key') == 'draftkings':
-                selected_bookmaker = bookmaker
-                bookmaker_key = 'draftkings'
-                break
-        
-        # Fallback to FanDuel if DraftKings not available
-        if not selected_bookmaker:
-            for bookmaker in bookmakers:
-                if bookmaker.get('key') == 'fanduel':
-                    selected_bookmaker = bookmaker
-                    bookmaker_key = 'fanduel'
-                    break
-        
-        # Skip only if neither DraftKings nor FanDuel available
-        if not selected_bookmaker:
-            continue
-        
-        game_odds['bookmaker_used'] = bookmaker_key
-        if bookmaker_key == 'draftkings':
-            draftkings_count += 1
+    def get_daily_schedule(self, date: datetime) -> Optional[Dict]:
+        """Get games for a specific date (expects datetime object, converts to UTC string)"""
+        # Convert to UTC if not already
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=timezone.utc)
         else:
-            fanduel_count += 1
+            date = date.astimezone(timezone.utc)
         
-        # Extract markets from selected bookmaker
-        markets = selected_bookmaker.get('markets', [])
-        
-        for market in markets:
-            market_key = market.get('key')
-            outcomes = market.get('outcomes', [])
-            
-            # Moneyline (h2h)
-            if market_key == 'h2h':
-                for outcome in outcomes:
-                    name = outcome.get('name')
-                    odds_decimal = outcome.get('price')
-                    
-                    if name == home_team and odds_decimal:
-                        game_odds['home_winning_odds_decimal'] = odds_decimal
-                    elif name == away_team and odds_decimal:
-                        game_odds['away_winning_odds_decimal'] = odds_decimal
-            
-            # Spreads
-            elif market_key == 'spreads':
-                for outcome in outcomes:
-                    name = outcome.get('name')
-                    odds_decimal = outcome.get('price')
-                    point = outcome.get('point')
-                    
-                    if name == home_team and odds_decimal and point is not None:
-                        game_odds['home_spread'] = point
-                        game_odds['home_spread_odds_decimal'] = odds_decimal
-                    elif name == away_team and odds_decimal and point is not None:
-                        game_odds['away_spread'] = point
-                        game_odds['away_spread_odds_decimal'] = odds_decimal
-            
-            # Totals (over/under)
-            elif market_key == 'totals':
-                for outcome in outcomes:
-                    name = outcome.get('name')
-                    odds_decimal = outcome.get('price')
-                    point = outcome.get('point')
-                    
-                    if name == 'Over' and odds_decimal:
-                        game_odds['total_line_over_odds_decimal'] = odds_decimal
-                        if point is not None:
-                            game_odds['total_line_o'] = point
-                    elif name == 'Under' and odds_decimal:
-                        game_odds['total_line_under_odds_decimal'] = odds_decimal
-        
-        if selected_bookmaker:  # Has selected bookmaker data (DK or FD)
-            odds_list.append(game_odds)
+        date_str = date.strftime("%Y/%m/%d")
+        endpoint = f"games/{date_str}/schedule.{FORMAT}"
+        return self._make_request(endpoint)
     
-    print(f"✓ Extracted {len(odds_list)} games")
-    print(f"  - DraftKings: {draftkings_count}")
-    print(f"  - FanDuel (fallback): {fanduel_count}\n")
-    return odds_list
+    def get_season_schedule(self, year: int = 2024, season_type: str = "REG") -> Optional[Dict]:
+        """Get full season schedule"""
+        endpoint = f"games/{year}/{season_type}/schedule.{FORMAT}"
+        return self._make_request(endpoint)
+    
+    def get_game_summary(self, game_id: str) -> Optional[Dict]:
+        """Get detailed game statistics"""
+        endpoint = f"games/{game_id}/summary.{FORMAT}"
+        return self._make_request(endpoint)
+    
+    def get_team_profile(self, team_id: str) -> Optional[Dict]:
+        """Get team profile with roster and basic stats"""
+        if team_id in self.team_profiles:
+            return self.team_profiles[team_id]
+        
+        endpoint = f"teams/{team_id}/profile.{FORMAT}"
+        profile = self._make_request(endpoint)
+        if profile:
+            self.team_profiles[team_id] = profile
+        return profile
+    
+    def get_seasonal_statistics(self, year: int = 2024, season_type: str = "REG") -> Optional[Dict]:
+        """Get seasonal statistics for all teams"""
+        endpoint = f"seasons/{year}/{season_type}/statistics.{FORMAT}"
+        return self._make_request(endpoint)
+    
+    def get_upcoming_games(self, days_ahead: int = 1) -> List[Dict]:
+        """
+        Get games for today and the next N days (in UTC)
+        
+        Args:
+            days_ahead: Number of days to look ahead (default 1 = today + tomorrow in UTC)
+        """
+        print(f"\n{'='*60}")
+        print(f"Fetching upcoming games (next {days_ahead} days)")
+        print(f"{'='*60}\n")
+        
+        all_games = []
+        
+        # Get current UTC time
+        utc_now = datetime.now(timezone.utc)
+        local_now = datetime.now()
+        
+        print(f"Current UTC time: {utc_now.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print(f"Your local time:  {local_now.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        for day_offset in range(days_ahead):
+            utc_date = utc_now + timedelta(days=day_offset)
+            date_str = utc_date.strftime("%Y-%m-%d")
+            print(f"Checking {date_str} UTC ({utc_date.strftime('%A')})...")
+            
+            schedule = self.get_daily_schedule(utc_date)
+            
+            if schedule and 'games' in schedule:
+                games = schedule['games']
+                print(f"  Found {len(games)} games")
+                
+                for game in games:
+                    game['fetch_date'] = date_str
+                    all_games.append(game)
+            else:
+                print(f"  No games found")
+        
+        return all_games
+    
+    def get_team_recent_games(self, team_id: str, num_games: int = 5, 
+                             year: int = 2024, season_type: str = "REG") -> List[Dict]:
+        """
+        Get recent completed games for a team
+        
+        Args:
+            team_id: Team identifier
+            num_games: Number of recent games to fetch
+        """
+        cache_key = f"{team_id}_{num_games}"
+        if cache_key in self.team_recent_games:
+            return self.team_recent_games[cache_key]
+        
+        print(f"  Fetching recent {num_games} games for team {team_id[:8]}...")
+        
+        # Get season schedule
+        schedule = self.get_season_schedule(year, season_type)
+        if not schedule or 'games' not in schedule:
+            return []
+        
+        # Filter games for this team that are completed
+        team_games = []
+        for game in schedule['games']:
+            if game.get('status') != 'closed':
+                continue
+            
+            home_id = game.get('home', {}).get('id')
+            away_id = game.get('away', {}).get('id')
+            
+            if team_id in [home_id, away_id]:
+                team_games.append(game)
+        
+        # Get most recent N games
+        recent_games = sorted(
+            team_games, 
+            key=lambda x: x.get('scheduled', ''), 
+            reverse=True
+        )[:num_games]
+        
+        # Fetch detailed stats for each game
+        detailed_games = []
+        for game in recent_games:
+            game_summary = self.get_game_summary(game['id'])
+            if game_summary:
+                detailed_games.append(game_summary)
+        
+        self.team_recent_games[cache_key] = detailed_games
+        return detailed_games
+    
+    def calculate_team_recent_stats(self, team_id: str, recent_games: List[Dict]) -> Dict:
+        """
+        Calculate statistics from recent games for a team
+        
+        Returns aggregated stats: averages, trends, form
+        """
+        if not recent_games:
+            return {}
+        
+        stats_list = []
+        results = []
+        
+        for game in recent_games:
+            # Determine if team was home or away
+            home_id = game.get('home', {}).get('id')
+            away_id = game.get('away', {}).get('id')
+            
+            if team_id == home_id:
+                team_stats = game.get('home', {}).get('statistics', {})
+                opp_stats = game.get('away', {}).get('statistics', {})
+                team_points = game.get('home', {}).get('points', 0)
+                opp_points = game.get('away', {}).get('points', 0)
+                is_home = True
+            else:
+                team_stats = game.get('away', {}).get('statistics', {})
+                opp_stats = game.get('home', {}).get('statistics', {})
+                team_points = game.get('away', {}).get('points', 0)
+                opp_points = game.get('home', {}).get('points', 0)
+                is_home = False
+            
+            stats_list.append(team_stats)
+            results.append({
+                'won': team_points > opp_points,
+                'points_for': team_points,
+                'points_against': opp_points,
+                'is_home': is_home
+            })
+        
+        # Calculate averages
+        avg_stats = self._average_stats(stats_list)
+        
+        # Calculate form metrics
+        form_stats = self._calculate_form(results)
+        
+        # Combine
+        recent_stats = {
+            'games_played': len(recent_games),
+            **{f'recent_{k}': v for k, v in avg_stats.items()},
+            **form_stats
+        }
+        
+        return recent_stats
+    
+    def _average_stats(self, stats_list: List[Dict]) -> Dict:
+        """Calculate average statistics from multiple games"""
+        if not stats_list:
+            return {}
+        
+        # Key stats to average
+        key_metrics = [
+            'points', 'field_goals_pct', 'three_points_pct', 'free_throws_pct',
+            'rebounds', 'assists', 'turnovers', 'steals', 'blocks',
+            'offensive_rebounds', 'defensive_rebounds'
+        ]
+        
+        avg_stats = {}
+        for metric in key_metrics:
+            values = [s.get(metric, 0) for s in stats_list if metric in s]
+            if values:
+                avg_stats[metric] = round(np.mean(values), 2)
+        
+        return avg_stats
+    
+    def _calculate_form(self, results: List[Dict]) -> Dict:
+        """Calculate form metrics (wins, scoring trends, etc.)"""
+        if not results:
+            return {}
+        
+        wins = sum(1 for r in results if r['won'])
+        
+        # Calculate point differential
+        point_diffs = [r['points_for'] - r['points_against'] for r in results]
+        
+        # Calculate trends (using linear regression on points)
+        points_scored = [r['points_for'] for r in results]
+        
+        form = {
+            'recent_wins': wins,
+            'recent_losses': len(results) - wins,
+            'recent_win_pct': round(wins / len(results), 3) if results else 0,
+            'recent_ppg': round(np.mean([r['points_for'] for r in results]), 2),
+            'recent_opp_ppg': round(np.mean([r['points_against'] for r in results]), 2),
+            'recent_point_diff': round(np.mean(point_diffs), 2),
+            'recent_scoring_trend': self._calculate_trend(points_scored)
+        }
+        
+        return form
+    
+    def _calculate_trend(self, values: List[float]) -> str:
+        """Calculate if values are trending up, down, or stable"""
+        if len(values) < 2:
+            return 'stable'
+        
+        # Simple linear regression
+        x = np.arange(len(values))
+        z = np.polyfit(x, values, 1)
+        slope = z[0]
+        
+        if slope > 1:
+            return 'up'
+        elif slope < -1:
+            return 'down'
+        else:
+            return 'stable'
+    
+    def create_game_identifier(self, game: Dict) -> str:
+        """
+        Create a unique identifier that can match between APIs
+        
+        Format: DATE_AWAYTEAM_HOMETEAM
+        This can be used to match with odds data which typically uses date + teams
+        """
+        scheduled = game.get('scheduled', '')
+        if scheduled:
+            game_date = scheduled.split('T')[0]  # Get YYYY-MM-DD
+        else:
+            game_date = 'UNKNOWN'
+        
+        home_name = game.get('home', {}).get('name', '')
+        away_name = game.get('away', {}).get('name', '')
+        
+        home_alias = self._get_team_alias(home_name)
+        away_alias = self._get_team_alias(away_name)
+        
+        # Create identifier: DATE_AWAY@HOME
+        identifier = f"{game_date}_{away_alias}@{home_alias}"
+        
+        return identifier
+    
+    def enrich_game_with_features(self, game: Dict, recent_games_count: int = 5) -> Dict:
+        """
+        Enrich a single game with pre-match features
+        
+        Args:
+            game: Game object from schedule
+            recent_games_count: Number of recent games to analyze
+        
+        Returns:
+            Dictionary with game info + pre-match features
+        """
+        home_id = game.get('home', {}).get('id')
+        away_id = game.get('away', {}).get('id')
+        home_name = game.get('home', {}).get('name', '')
+        away_name = game.get('away', {}).get('name', '')
+        home_alias = self._get_team_alias(home_name)
+        away_alias = self._get_team_alias(away_name)
+        
+        print(f"\n{'─'*60}")
+        print(f"Processing: {away_alias} @ {home_alias}")
+        print(f"{'─'*60}")
+        
+        # Basic game info
+        enriched_data = {
+            'match_id': game.get('id', ''),
+            'game_identifier': self.create_game_identifier(game),
+            'scheduled': game.get('scheduled', ''),
+            'status': game.get('status', ''),
+            'venue_name': game.get('venue', {}).get('name', ''),
+            'venue_city': game.get('venue', {}).get('city', ''),
+            'league': 'NBA',
+            
+            'home_id': home_id,
+            'home_name': home_name,
+            'home_alias': home_alias,
+            'home_market': game.get('home', {}).get('market', ''),
+            
+            'away_id': away_id,
+            'away_name': away_name,
+            'away_alias': away_alias,
+            'away_market': game.get('away', {}).get('market', ''),
+        }
+        
+        # Fetch recent games for home team
+        print(f"Home team ({home_alias})")
+        home_recent = self.get_team_recent_games(home_id, recent_games_count)
+        home_stats = self.calculate_team_recent_stats(home_id, home_recent)
+        
+        # Add with prefix
+        for key, value in home_stats.items():
+            enriched_data[f'home_{key}'] = value
+        
+        # Fetch recent games for away team
+        print(f"Away team ({away_alias})")
+        away_recent = self.get_team_recent_games(away_id, recent_games_count)
+        away_stats = self.calculate_team_recent_stats(away_id, away_recent)
+        
+        # Add with prefix
+        for key, value in away_stats.items():
+            enriched_data[f'away_{key}'] = value
+        
+        # Calculate comparative features
+        enriched_data.update(self._calculate_comparative_features(home_stats, away_stats))
+        
+        return enriched_data
+    
+    def _calculate_comparative_features(self, home_stats: Dict, away_stats: Dict) -> Dict:
+        """
+        Calculate comparative features between teams
+        """
+        comparative = {}
+        
+        # Point differential advantage
+        home_ppg = home_stats.get('recent_ppg', 0)
+        away_ppg = away_stats.get('recent_ppg', 0)
+        comparative['scoring_advantage_home'] = round(home_ppg - away_ppg, 2)
+        
+        # Form comparison
+        home_win_pct = home_stats.get('recent_win_pct', 0)
+        away_win_pct = away_stats.get('recent_win_pct', 0)
+        comparative['form_advantage_home'] = round(home_win_pct - away_win_pct, 3)
+        
+        # Defensive comparison (lower is better)
+        home_opp_ppg = home_stats.get('recent_opp_ppg', 0)
+        away_opp_ppg = away_stats.get('recent_opp_ppg', 0)
+        comparative['defensive_advantage_home'] = round(away_opp_ppg - home_opp_ppg, 2)
+        
+        # Assist-to-turnover comparison
+        home_assists = home_stats.get('recent_assists', 0)
+        home_turnovers = home_stats.get('recent_turnovers', 1)
+        away_assists = away_stats.get('recent_assists', 0)
+        away_turnovers = away_stats.get('recent_turnovers', 1)
+        
+        home_ratio = round(home_assists / home_turnovers, 2) if home_turnovers > 0 else 0
+        away_ratio = round(away_assists / away_turnovers, 2) if away_turnovers > 0 else 0
+        comparative['ball_control_advantage_home'] = round(home_ratio - away_ratio, 2)
+        
+        return comparative
+    
+    def process_upcoming_games(self, days_ahead: int = 1, recent_games_count: int = 5) -> List[Dict]:
+        """
+        Main pipeline: Fetch upcoming games and enrich with features
+        
+        Args:
+            days_ahead: Number of days to look ahead
+            recent_games_count: Number of recent games to analyze per team
+        """
+        print(f"\n{'='*60}")
+        print(f"PRE-MATCH FEATURE ENGINEERING")
+        print(f"{'='*60}")
+        print(f"Looking ahead: {days_ahead} days")
+        print(f"Recent games per team: {recent_games_count}")
+        print(f"API keys available: {len(self.api_keys)}")
+        print(f"Rate limit threshold: {RATE_LIMIT_THRESHOLD} consecutive hits")
+        print(f"{'='*60}")
+        
+        # Get upcoming games
+        upcoming_games = self.get_upcoming_games(days_ahead)
+        
+        if not upcoming_games:
+            print("\n❌ No upcoming games found")
+            return []
+        
+        print(f"\n{'='*60}")
+        print(f"Found {len(upcoming_games)} upcoming games")
+        print(f"{'='*60}")
+        
+        # Enrich each game
+        enriched_games = []
+        for idx, game in enumerate(upcoming_games, 1):
+            print(f"\n[{idx}/{len(upcoming_games)}]")
+            enriched = self.enrich_game_with_features(game, recent_games_count)
+            enriched_games.append(enriched)
+        
+        return enriched_games
 
 
 def main():
-    print("\n" + "="*80)
-    print("THE ODDS API - UPCOMING NBA ODDS & SPREADS")
-    print("(DraftKings preferred, FanDuel fallback)")
-    print("="*80)
-    print(f"API keys available: {len(API_KEYS)}")
-    print(f"Rate limit threshold: {RATE_LIMIT_THRESHOLD} consecutive hits")
+    """Main execution"""
     
-    # Initialize API client
-    client = OddsAPIClient()
+    # Configuration
+    CONFIG = {
+        'days_ahead': 1,           # Today + tomorrow
+        'recent_games_count': 5,   # Last 5 games for each team
+    }
     
-    # Step 1: Get upcoming games with odds
-    games = client.get_upcoming_nba_odds()
+    print("="*60)
+    print("NBA PRE-MATCH FEATURE ENGINEERING")
+    print("="*60)
+    print("\nConfiguration:")
+    for key, value in CONFIG.items():
+        print(f"  {key}: {value}")
     
-    if not games:
-        print("\n✗ No games found")
+    # Initialize engine
+    engine = PreMatchFeatureEngine()
+    
+    # Process upcoming games
+    enriched_games = engine.process_upcoming_games(**CONFIG)
+    
+    if not enriched_games:
+        print("\n❌ No data to export")
         return
     
-    # Step 2: Extract odds (with fallback)
-    odds_list = extract_draftkings_odds(games)
+    # Convert to DataFrame
+    df = pd.DataFrame(enriched_games)
     
-    if not odds_list:
-        print("\n✗ No games found with DraftKings or FanDuel odds")
-        return
+    # Summary
+    print(f"\n{'='*60}")
+    print("SUMMARY")
+    print(f"{'='*60}")
+    print(f"Games processed: {len(df)}")
+    print(f"Features per game: {len(df.columns)}")
+    print(f"API requests made: {engine.request_count}")
     
-    # Step 3: Create DataFrame and save
-    print(f"{'='*80}")
-    print("SAVING DATA")
-    print(f"{'='*80}\n")
+    print(f"\n{'='*60}")
+    print("FEATURE COLUMNS")
+    print(f"{'='*60}")
+    print(f"Total columns: {len(df.columns)}")
+    print("\nSample columns:")
+    for col in list(df.columns)[:20]:
+        print(f"  - {col}")
+    print(f"  ... and {len(df.columns) - 20} more")
     
-    df_odds = pd.DataFrame(odds_list)
+    # Save to CSV
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"nba_prematch_features.csv"
+    df.to_csv(filename, index=False)
     
-    # Convert odds columns to numeric
-    odds_columns = [
-        'home_winning_odds_decimal', 'away_winning_odds_decimal',
-        'home_spread', 'away_spread',
-        'home_spread_odds_decimal', 'away_spread_odds_decimal',
-        'total_line_o', 'total_line_over_odds_decimal', 'total_line_under_odds_decimal'
-    ]
-    for col in odds_columns:
-        if col in df_odds.columns:
-            df_odds[col] = pd.to_numeric(df_odds[col], errors='coerce')
+    print(f"\n{'='*60}")
+    print(f"✓ Data saved to: {filename}")
+    print(f"{'='*60}")
     
-    current_dir = os.getcwd()
-    output_file = os.path.join(current_dir, "upcoming_nba_odds.csv")
-    
-    df_odds.to_csv(output_file, index=False)
-    print(f"✓ Saved: {output_file}")
-    print(f"  Games: {len(df_odds)}")
-    print(f"  Columns: {len(df_odds.columns)}\n")
-    
-    # Step 4: Show sample
-    print(f"{'='*80}")
-    print("SAMPLE DATA")
-    print(f"{'='*80}\n")
+    # Display sample data
+    print(f"\n{'='*60}")
+    print("SAMPLE DATA (first 2 games)")
+    print(f"{'='*60}")
     
     sample_cols = [
-        'game_identifier', 'date', 'bookmaker_used',
-        'home_team', 'away_team',
-        'home_spread', 'home_spread_odds_decimal',
-        'away_spread', 'away_spread_odds_decimal',
-        'total_line_o', 'total_line_over_odds_decimal', 'total_line_under_odds_decimal'
+        'game_identifier', 'home_alias', 'away_alias',
+        'home_recent_ppg', 'away_recent_ppg',
+        'home_recent_win_pct', 'away_recent_win_pct',
+        'scoring_advantage_home', 'form_advantage_home'
     ]
     
-    available_cols = [c for c in sample_cols if c in df_odds.columns]
-    
+    available_cols = [col for col in sample_cols if col in df.columns]
     if available_cols:
-        print(df_odds[available_cols].head(5).to_string(index=False))
+        print(df[available_cols].head(2).to_string())
     
-    # Step 5: Statistics
-    print(f"\n{'='*80}")
-    print("STATISTICS")
-    print(f"{'='*80}\n")
-    
-    print(f"Total upcoming NBA games with odds: {len(df_odds)}")
-    
-    # Bookmaker distribution
-    if 'bookmaker_used' in df_odds.columns:
-        bm_counts = df_odds['bookmaker_used'].value_counts()
-        print(f"\nBookmaker distribution:")
-        for bm, count in bm_counts.items():
-            print(f"  {bm.title()}: {count}")
-    
-    print(f"\nOdds availability:")
-    print(f"  Home spread_odds_decimal: {df_odds['home_spread_odds_decimal'].notna().sum()}")
-    print(f"  Away spread_odds_decimal: {df_odds['away_spread_odds_decimal'].notna().sum()}")
-    print(f"  Total over: {df_odds['total_line_over_odds_decimal'].notna().sum()}")
-    print(f"  Total under: {df_odds['total_line_under_odds_decimal'].notna().sum()}")
-    
-    print(f"\nSpread ranges:")
-    if df_odds['home_spread'].notna().sum() > 0:
-        print(f"  Home spread: {df_odds['home_spread'].min():.1f} to {df_odds['home_spread'].max():.1f}")
-        print(f"  Away spread: {df_odds['away_spread'].min():.1f} to {df_odds['away_spread'].max():.1f}")
-    
-    if df_odds['total_line_o'].notna().sum() > 0:
-        print(f"  Total line: {df_odds['total_line_o'].min():.1f} to {df_odds['total_line_o'].max():.1f}")
-    
-    print(f"\n{'='*80}")
-    print("✓ COLUMNS EXTRACTED:")
-    print(f"{'='*80}")
-    print("✓ bookmaker_used                     - Source bookmaker (draftkings/fanduel)")
-    print("✓ home_spread                        - Home team spread points")
-    print("✓ away_spread                        - Away team spread points")
-    print("✓ home_spread_odds_decimal           - Home team spread price (decimal odds)")
-    print("✓ away_spread_odds_decimal           - Away team spread price (decimal odds)")
-    print("✓ total_line_o                       - Total points line")
-    print("✓ total_line_over_odds_decimal       - Over total price (decimal odds)")
-    print("✓ total_line_under_odds_decimal      - Under total price (decimal odds)")
-    print(f"{'='*80}\n")
+    print(f"\n{'='*60}")
+    print("NOTES")
+    print(f"{'='*60}")
+    print("1. game_identifier can be used to match with odds data")
+    print("   Format: DATE_AWAY@HOME (e.g., 2024-11-04_BOS@LAL)")
+    print("\n2. For odds matching, use this identifier instead of API IDs")
+    print("\n3. All recent_* features are from last N games")
+    print("\n4. Comparative features show home team advantage")
+    print("="*60)
 
 
 if __name__ == "__main__":
