@@ -1,3 +1,4 @@
+import os
 import requests
 import psycopg2
 import pandas as pd
@@ -10,11 +11,11 @@ from collections import defaultdict
 # ============================================================================
 # DATABASE CONFIGURATION
 # ============================================================================
-DB_HOST = 'winbets-predictions.postgres.database.azure.com'
-DB_PORT = '5432'
-DB_NAME = 'postgres'
-DB_USER = 'winbets'
-DB_PASSWORD = 'Constantinople@1900'
+DB_HOST = os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT', '5432')
+DB_NAME = os.environ.get('DB_DATABASE')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 TABLE_NAME = 'agility_nba_b1'
 
 # ============================================================================
