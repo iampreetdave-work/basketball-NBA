@@ -1,16 +1,20 @@
+import os
 import psycopg2
 import pandas as pd
 from psycopg2 import sql
-# Database configuration
+
+# Database configuration from environment variables (GitHub Secrets)
 DB_CONFIG = {
-    'host': 'winbets-predictions.postgres.database.azure.com',
-    'port': 5432,
-    'database': 'postgres',
-    'user': 'winbets',
-    'password': 'Constantinople@1900'
+    'host': os.environ.get('DB_HOST'),
+    'port': int(os.environ.get('DB_PORT', 5432)),
+    'database': os.environ.get('DB_DATABASE'),
+    'user': os.environ.get('DB_USER'),
+    'password': os.environ.get('DB_PASSWORD')
 }
+
 TABLE_NAME = 'agility_nba_b1'
 CSV_FILE = 'NBA_PREDICTIONS_ML.csv'
+
 # All columns from generated CSV (excluding id)
 CSV_COLUMNS = [
     'date',
@@ -52,14 +56,16 @@ CSV_COLUMNS = [
     'spread_covered_predicted',
     'spread_covered_actual'
 ]
-# Column mapping: CSV column -> Database column
-# Since CSV and database use same names, no mapping needed (1:1)
-COLUMN_MAPPING = {
-    # CSV_column: database_column (same for all - direct mapping)
-}
+
+COLUMN_MAPPING = {}
+
 def push_data():
     """Read CSV and push all columns to database"""
     try:
+        # Validate credentials are loaded
+        if not all(DB_CONFIG.values()):
+            raise ValueError("Missing database credentials in environment variables")
+        
         # Read CSV
         print(f"Reading {CSV_FILE}...")
         df = pd.read_csv(CSV_FILE)
@@ -141,5 +147,6 @@ def push_data():
     except Exception as e:
         print(f"✗ Fatal error: {e}")
         raise
+
 if __name__ == "__main__":
     push_data()
