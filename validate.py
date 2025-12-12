@@ -128,60 +128,61 @@ def calculate_ml_correct(predicted_winner, actual_winner):
     return 1 if pred_normalized == actual_normalized else 0
 
 
-def calculate_spread_covered_actual(home_points_actual, away_points_actual, ml_actual, home_spread, away_spread):
+def calculate_spread_covered_actual(home_points_actual, away_points_actual, ml_prediction, ml_actual, home_spread, away_spread):
     """
-    Calculate if the actual spread was covered using SIGNED values
+    Calculate if the predicted team covered their spread.
     
-    Logic: margin > -spread_value
-    - margin = home_points_actual - away_points_actual (directional)
-    - spread_value = home_spread (signed: negative for favorites, positive for underdogs)
+    Logic:
+    1. First check if ML prediction was correct
+       - If WRONG: return "WRONG"
+       - If CORRECT: proceed to step 2
+    
+    2. Check if the predicted team covered their spread
+       - margin > -spread_value for coverage
+       - Return "TRUE" if covered, "FALSE" if not
     
     Args:
         home_points_actual: int - home team actual points
         away_points_actual: int - away team actual points
-        ml_actual: str - "Home Win" or "Away Win" (not used in calculation)
+        ml_prediction: str - "Home Win" or "Away Win" (what was predicted)
+        ml_actual: str - "Home Win" or "Away Win" (what actually happened)
         home_spread: float - home team spread (SIGNED)
-        away_spread: float - away team spread (not used, kept for signature compatibility)
+        away_spread: float - away team spread (SIGNED)
     
     Returns:
-        str - 'TRUE' if spread covered, 'FALSE' if not covered, 'PUSH' if exact, None if data missing
-    
-    Examples:
-        home_spread = -5.5 (home favored by 5.5)
-        home = 110, away = 105, margin = 5
-        Is 5 > 5.5? NO → 'FALSE' (didn't cover)
-        
-        home_spread = -5.5 (home favored by 5.5)
-        home = 112, away = 105, margin = 7
-        Is 7 > 5.5? YES → 'TRUE' (covered)
-        
-        home_spread = +8.5 (home underdog by 8.5)
-        home = 100, away = 108, margin = -8
-        Is -8 > -8.5? YES → 'TRUE' (covered)
+        str - 'WRONG' if ML wrong, 'TRUE' if covered, 'FALSE' if not covered, None if data missing
     """
     if (pd.isna(home_points_actual) or pd.isna(away_points_actual) or 
-        pd.isna(home_spread)):
+        ml_prediction is None or ml_actual is None or 
+        pd.isna(home_spread) or pd.isna(away_spread)):
         return None
     
     try:
+        # Normalize for comparison
+        pred_normalized = str(ml_prediction).strip().upper()
+        actual_normalized = str(ml_actual).strip().upper()
+        
+        # STEP 1: Check if ML prediction was correct
+        if pred_normalized != actual_normalized:
+            return 'WRONG'  # ML prediction was wrong
+        
+        # STEP 2: ML prediction was correct, check if predicted team covered spread
         h_pts = int(home_points_actual)
         a_pts = int(away_points_actual)
-        
-        # Calculate SIGNED margin (home perspective)
-        # Positive = home ahead, Negative = away ahead
         margin = h_pts - a_pts
         
-        # Get spread as float (preserves sign)
-        spread_value = float(home_spread)
-        
-        # Compare: margin > -spread_value
-        # This formula works for all cases (favorites, underdogs, pick'em)
-        if margin > -spread_value:
-            return 'TRUE'   # Home covers the spread
-        elif margin < -spread_value:
-            return 'FALSE'  # Away covers the spread
-        else:
-            return 'PUSH'   # Exact match (push)
+        if pred_normalized == "HOME WIN":
+            # Predicted Home, check if Home covered their spread
+            spread_value = float(home_spread)
+            threshold = -spread_value
+            return 'TRUE' if margin > threshold else 'FALSE'
+        else:  # "AWAY WIN"
+            # Predicted Away, check if Away covered their spread
+            away_margin = -margin
+            spread_value = float(away_spread)
+            threshold = -spread_value
+            return 'TRUE' if away_margin > threshold else 'FALSE'
+    
     except (ValueError, TypeError):
         return None
 
@@ -239,39 +240,45 @@ def calculate_ml_pnl(ml_correct, moneyline_odds):
         return None
 
 
-def calculate_spread_pnl(spread_covered_predicted, spread_covered_actual, ml_actual, home_spread_odds, away_spread_odds):
+def calculate_spread_pnl(spread_covered_predicted, spread_covered_actual, ml_prediction, home_spread_odds, away_spread_odds):
     """
     Calculate P/L on spread bet.
     
     Logic:
-    - If spread_covered_predicted == spread_covered_actual: profit = (winning_team_spread_odds * 1) - 1
-    - If not equal: loss = -1.0
+    - If ML prediction was wrong: spread_covered_actual = "WRONG", return -1.0
+    - If ML prediction was correct:
+      - If predictions MATCH (both TRUE or both FALSE): profit = (odds * 1) - 1
+      - If predictions DON'T MATCH: loss = -1.0
     
     Args:
-        spread_covered_predicted: str - 'TRUE' or 'FALSE' (was spread covered in prediction)
-        spread_covered_actual: str - 'TRUE' or 'FALSE' (was spread actually covered)
-        ml_actual: str - "Home Win" or "Away Win"
+        spread_covered_predicted: str - 'TRUE' or 'FALSE' (prediction)
+        spread_covered_actual: str - 'WRONG', 'TRUE', or 'FALSE' (actual)
+        ml_prediction: str - "Home Win" or "Away Win" (determines which odds to use)
         home_spread_odds: float - odds for home spread
         away_spread_odds: float - odds for away spread
     
     Returns:
         float - rounded to 2 decimal places, or None if data missing
     """
-    if (pd.isna(spread_covered_predicted) or pd.isna(spread_covered_actual) or 
-        ml_actual is None):
+    if (spread_covered_predicted is None or spread_covered_actual is None or 
+        ml_prediction is None):
         return None
     
     try:
-        # Normalize predicted and actual values for comparison
-        pred_normalized = str(spread_covered_predicted).strip().upper()
+        # Normalize
         actual_normalized = str(spread_covered_actual).strip().upper()
+        pred_normalized = str(spread_covered_predicted).strip().upper()
         
-        # Check if predictions match actual
+        # If ML prediction was wrong, automatic loss
+        if actual_normalized == 'WRONG':
+            return -1.0
+        
+        # ML prediction was correct, check if spread predictions match actual
         if pred_normalized == actual_normalized:
-            # Get the odds for the winning team
-            if str(ml_actual).strip().upper() == "HOME WIN":
+            # Predictions matched! Calculate profit using predicted team's odds
+            if str(ml_prediction).strip().upper() == "HOME WIN":
                 odds = float(home_spread_odds) if pd.notna(home_spread_odds) else None
-            elif str(ml_actual).strip().upper() == "AWAY WIN":
+            elif str(ml_prediction).strip().upper() == "AWAY WIN":
                 odds = float(away_spread_odds) if pd.notna(away_spread_odds) else None
             else:
                 return None
@@ -279,11 +286,13 @@ def calculate_spread_pnl(spread_covered_predicted, spread_covered_actual, ml_act
             if odds is None or odds <= 0:
                 return None
             
+            # Profit: (odds * 1) - 1
             pnl = round((odds * 1) - 1, 2)
+            return pnl
         else:
-            pnl = -1.0
-        
-        return pnl
+            # Predictions didn't match, loss
+            return -1.0
+    
     except (ValueError, TypeError):
         return None
 
@@ -554,11 +563,12 @@ def validate_with_actual_data(predictions_csv, prematch_csv):
     )
     
     # ========== SPREAD CALCULATIONS ==========
-    # Calculate spread covered actual (FIXED - using SIGNED margin logic)
+    # Calculate spread covered actual (FIXED - checks predicted team's spread)
     df_validation['spread_covered_actual'] = df_validation.apply(
         lambda row: calculate_spread_covered_actual(
             row['home_points_actual'], 
             row['away_points_actual'],
+            row['ml_prediction'],
             row['ml_actual'],
             row['home_spread'],
             row['away_spread']
@@ -566,12 +576,12 @@ def validate_with_actual_data(predictions_csv, prematch_csv):
         axis=1
     )
     
-    # Calculate spread PnL
+    # Calculate spread PnL (FIXED - uses ml_prediction for odds)
     df_validation['spread_pnl'] = df_validation.apply(
         lambda row: calculate_spread_pnl(
             row['spread_covered_predicted'],
             row['spread_covered_actual'],
-            row['ml_actual'],
+            row['ml_prediction'],
             row['home_spread_odds'],
             row['away_spread_odds']
         ),
@@ -627,6 +637,7 @@ def validate_with_actual_data(predictions_csv, prematch_csv):
     # Spread Stats
     spread_covered_correct = df_validation.apply(
         lambda row: 1 if (pd.notna(row['spread_covered_actual']) and 
+                         str(row['spread_covered_actual']).strip().upper() != 'WRONG' and
                          str(row['spread_covered_predicted']).strip().upper() == str(row['spread_covered_actual']).strip().upper()) else 0,
         axis=1
     ).sum()
