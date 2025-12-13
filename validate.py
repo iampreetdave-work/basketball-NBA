@@ -23,10 +23,10 @@ TABLE_NAME = 'agility_nba_b1'
 # ============================================================================
 API_KEYS = [
     "fFdak1w9shF9hQVZOTaFEPBvRFw2ONSo8hfduCBI",
-    "yaVs9ag9ZV7B011YWcbOFuszgN5bdeTai5r8eVWi",
-    "7iXdsTMLsQpiFV6f1aWUak0BOoYrmuAf4YD99oVE",
-    "dfgSQXX31W4efJ2Nqq71E35eVbtRBth8BYtHRYPc",
-    "6vTdojNKZXdXhLLN9XgqlqqfXC87g3L3EoagQVAi"
+    "zj0IXfhYBtagyfKNUem8fQKfYIU74kNiyhx5vFOR",
+    "5Mvm4Nyfl1t0QAxknd3NIU7YBm21hL4zlmmg11S8",
+    "ad5pG3KO1Y7OCJoO8IxGCRHn2sbiQsHB1CbUcRi9",
+    "IRNmE6PWKVEzvVCGc7EpIHGrhnPoph98k9O2C2OB"
 ]
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
