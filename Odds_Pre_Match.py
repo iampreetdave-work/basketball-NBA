@@ -303,7 +303,7 @@ def main():
             df_odds[col] = pd.to_numeric(df_odds[col], errors='coerce')
     
     current_dir = os.getcwd()
-    output_file = os.path.join(current_dir, "upcoming_nba_odds.csv")
+    output_file = os.path.join(current_dir, "upcoming_nba_draftkings_odds.csv")
     
     df_odds.to_csv(output_file, index=False)
     print(f"✓ Saved: {output_file}")
@@ -372,3 +372,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
