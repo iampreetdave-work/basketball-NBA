@@ -1,10 +1,7 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2025-12-14_WSH@IND,2025-12-14,2025-12-14T20:10:00Z,Indiana Pacers,Washington Wizards,upcoming,draftkings,-8.5,8.5,1.95,1.87,233.5,1.89,1.93,1.28,3.85
-2025-12-14_CHA@CLE,2025-12-14,2025-12-14T20:40:00Z,Cleveland Cavaliers,Charlotte Hornets,upcoming,draftkings,-11.5,11.5,1.93,1.89,234.5,1.93,1.89,1.18,5.1
-2025-12-14_PHI@ATL,2025-12-14,2025-12-14T23:10:00Z,Atlanta Hawks,Philadelphia 76ers,upcoming,draftkings,-4.5,4.5,1.87,1.95,226.5,1.89,1.93,1.49,2.7
-2025-12-14_MIL@BKN,2025-12-14,2025-12-14T23:10:00Z,Brooklyn Nets,Milwaukee Bucks,upcoming,draftkings,1.5,-1.5,1.98,1.85,219.5,1.89,1.93,2.1,1.77
-2025-12-15_NO@CHI,2025-12-15,2025-12-15T00:10:00Z,Chicago Bulls,New Orleans Pelicans,upcoming,draftkings,-4.5,4.5,1.83,2.0,243.5,1.91,1.91,1.51,2.64
-2025-12-15_SAC@MIN,2025-12-15,2025-12-15T00:10:00Z,Minnesota Timberwolves,Sacramento Kings,upcoming,draftkings,-10.5,10.5,1.85,1.98,231.5,1.95,1.87,1.18,5.1
-2025-12-15_LAL@PHX,2025-12-15,2025-12-15T01:10:00Z,Phoenix Suns,Los Angeles Lakers,upcoming,draftkings,1.5,-1.5,1.93,1.89,228.5,1.91,1.91,2.05,1.8
-2025-12-15_GS@POR,2025-12-15,2025-12-15T02:10:00Z,Portland Trail Blazers,Golden State Warriors,upcoming,draftkings,4.5,-4.5,1.87,1.95,233.5,1.91,1.91,2.54,1.54
-2025-12-17_SA@NY,2025-12-17,2025-12-17T01:40:00Z,New York Knicks,San Antonio Spurs,upcoming,draftkings,-2.5,2.5,1.95,1.87,227.5,1.91,1.91,1.77,2.1
+2025-12-16_DET@BOS,2025-12-16,2025-12-16T00:10:00Z,Boston Celtics,Detroit Pistons,upcoming,draftkings,-1.5,1.5,1.87,1.95,229.5,1.91,1.91,1.8,2.05
+2025-12-16_TOR@MIA,2025-12-16,2025-12-16T00:40:00Z,Miami Heat,Toronto Raptors,upcoming,draftkings,-5.5,5.5,1.87,1.95,237.5,1.91,1.91,1.43,2.9
+2025-12-16_DAL@UTAH,2025-12-16,2025-12-16T02:10:00Z,Utah Jazz,Dallas Mavericks,upcoming,draftkings,1.5,-1.5,1.93,1.89,238.5,1.95,1.87,2.05,1.8
+2025-12-16_HOU@DEN,2025-12-16,2025-12-16T02:40:00Z,Denver Nuggets,Houston Rockets,upcoming,draftkings,-1.5,1.5,1.95,1.87,235.5,1.95,1.87,1.87,1.95
+2025-12-16_MEM@LAC,2025-12-16,2025-12-16T03:40:00Z,Los Angeles Clippers,Memphis Grizzlies,upcoming,draftkings,-3.5,3.5,1.91,1.91,227.5,1.93,1.89,1.62,2.36
+2025-12-17_SA@NY,2025-12-17,2025-12-17T01:40:00Z,New York Knicks,San Antonio Spurs,upcoming,draftkings,-2.5,2.5,1.91,1.91,228.5,1.91,1.91,1.7,2.2
