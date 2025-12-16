@@ -1,7 +1,4 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2025-12-16_DET@BOS,2025-12-16,2025-12-16T00:10:00Z,Boston Celtics,Detroit Pistons,upcoming,draftkings,-1.5,1.5,1.87,1.95,229.5,1.91,1.91,1.8,2.05
-2025-12-16_TOR@MIA,2025-12-16,2025-12-16T00:40:00Z,Miami Heat,Toronto Raptors,upcoming,draftkings,-5.5,5.5,1.87,1.95,237.5,1.91,1.91,1.43,2.9
-2025-12-16_DAL@UTAH,2025-12-16,2025-12-16T02:10:00Z,Utah Jazz,Dallas Mavericks,upcoming,draftkings,1.5,-1.5,1.93,1.89,238.5,1.95,1.87,2.05,1.8
-2025-12-16_HOU@DEN,2025-12-16,2025-12-16T02:40:00Z,Denver Nuggets,Houston Rockets,upcoming,draftkings,-1.5,1.5,1.95,1.87,235.5,1.95,1.87,1.87,1.95
-2025-12-16_MEM@LAC,2025-12-16,2025-12-16T03:40:00Z,Los Angeles Clippers,Memphis Grizzlies,upcoming,draftkings,-3.5,3.5,1.91,1.91,227.5,1.93,1.89,1.62,2.36
-2025-12-17_SA@NY,2025-12-17,2025-12-17T01:40:00Z,New York Knicks,San Antonio Spurs,upcoming,draftkings,-2.5,2.5,1.91,1.91,228.5,1.91,1.91,1.7,2.2
+2025-12-17_SA@NY,2025-12-17,2025-12-17T01:40:00Z,New York Knicks,San Antonio Spurs,upcoming,draftkings,-2.5,2.5,1.91,1.91,231.5,1.95,1.87,1.74,2.14
+2025-12-18_CLE@CHI,2025-12-18,2025-12-18T01:10:00Z,Chicago Bulls,Cleveland Cavaliers,upcoming,draftkings,4.5,-4.5,1.95,1.87,240.5,1.91,1.91,2.54,1.54
+2025-12-18_MEM@MIN,2025-12-18,2025-12-18T01:10:00Z,Minnesota Timberwolves,Memphis Grizzlies,upcoming,fanduel,-7.5,7.5,1.93,1.89,236.5,1.91,1.91,1.36,3.25
