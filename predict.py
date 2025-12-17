@@ -303,29 +303,23 @@ results_df['ml_confidence'] = pred_confidence.round(2)
 results_df['status'] = 'PENDING'
 
 # ============================================================================
-# GRADING LOGIC - NEW (UPDATED)
+# GRADING LOGIC
 # ============================================================================
 def assign_grade(confidence, grade_type='ml'):
     """
     Assign grade based on ml_confidence and grade type
     
     grade (ML):
-        >= 85: A
-        69-84.99: C
-        52-68.99: B
-        < 52: D
+        >= 85: B
+        69-84.99: D
+        52-68.99: A
+        < 52: C
     
     ou_grade (Over/Under):
-        >= 80: A
-        40-53.99: B
+        >= 80: B
+        40-53.99: A
         30-44.99: C
         < 30: D
-    
-    spread_grade (Spread):
-        >= 80: A
-        50-79.99: B
-        35-49.99: C
-        < 35: D
     """
     if grade_type == 'ml':
         if confidence >= 85:
@@ -345,24 +339,14 @@ def assign_grade(confidence, grade_type='ml'):
             return 'C'
         else:
             return 'D'
-    elif grade_type == 'spread':
-        if confidence >= 80:
-            return 'A'
-        elif confidence >= 50 and confidence < 80:
-            return 'B'
-        elif confidence >= 35 and confidence < 50:
-            return 'D'
-        else:
-            return 'C'
     return 'D'
 
-# Apply grading to all three columns
+# Apply grading to moneyline and over/under
 results_df['grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x, 'ml'))
 results_df['ou_grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x, 'ou'))
-results_df['spread_grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x, 'spread'))
 
 # ============================================================================
-# SPREAD COVERAGE PREDICTION (FIXED - CHECKS PREDICTED TEAM)
+# SPREAD COVERAGE PREDICTION
 # ============================================================================
 # Logic: Check if the PREDICTED team covers THEIR spread
 
@@ -380,12 +364,6 @@ def calculate_spread_covered_predicted(row):
     
     Returns:
         'TRUE' if predicted team covers spread, 'FALSE' if doesn't cover, None if no spread data
-    
-    Logic:
-        If Home Win predicted:
-            - Check if home_margin > -home_spread
-        If Away Win predicted:
-            - Check if away_margin > -away_spread
     """
     
     # Skip if no spread data
@@ -410,6 +388,60 @@ def calculate_spread_covered_predicted(row):
 
 results_df['spread_covered_predicted'] = results_df.apply(calculate_spread_covered_predicted, axis=1)
 
+# ============================================================================
+# SPREAD GRADE CALCULATION - UPDATED (Using ML Confidence Thresholds)
+# ============================================================================
+
+def calculate_spread_grade_v2(row):
+    """
+    Calculate spread_grade based on ml_confidence and spread_covered_predicted
+    
+    First: Determine ML grade from confidence thresholds
+    Then: Apply spread grading logic
+    
+    Logic:
+        if spread_covered_predicted == TRUE and grade in ['A', 'B']:
+            spread_grade = 'A'
+        elif spread_covered_predicted == TRUE and grade in ['C', 'D']:
+            spread_grade = 'B'
+        elif spread_covered_predicted == FALSE and grade in ['A', 'B']:
+            spread_grade = 'C'
+        else:  # FALSE and C/D
+            spread_grade = 'D'
+    """
+    confidence = row['ml_confidence']
+    spread_pred = row['spread_covered_predicted']
+    
+    # Get ML grade from confidence
+    if confidence >= 85:
+        grade = 'B'
+    elif confidence >= 69:
+        grade = 'D'
+    elif confidence >= 52:
+        grade = 'A'
+    else:
+        grade = 'C'
+    
+    # Apply spread grading logic
+    if pd.isna(spread_pred):
+        return None
+    
+    pred_is_true = str(spread_pred).upper() == 'TRUE'
+    
+    if pred_is_true:
+        if grade in ['A', 'B']:
+            return 'A'
+        else:  # C, D
+            return 'B'
+    else:
+        if grade in ['A', 'B']:
+            return 'C'
+        else:  # C, D
+            return 'D'
+
+# Apply the spread grade calculation
+results_df['spread_grade'] = results_df.apply(calculate_spread_grade_v2, axis=1)
+
 # Add market_total_line (same as total_line_o)
 results_df['market_total_line'] = df['total_line_o'].values if 'total_line_o' in df.columns else None
 
@@ -425,7 +457,7 @@ results_df.rename(columns={
 results_df['spread_pnl'] = None
 results_df['spread_covered_actual'] = None
 
-# Reorder columns to match exact requested order (UPDATED WITH NEW COLUMNS)
+# Reorder columns to match exact requested order
 final_columns = [
     'id', 'date', 'league', 'game_identifier', 'home_id', 'home_team', 'away_id', 'away_team',
     'home_points_predicted', 'home_points_actual',
