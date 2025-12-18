@@ -1,13 +1,13 @@
-game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2025-12-18_CLE@CHI,2025-12-18,2025-12-18T01:10:00Z,Chicago Bulls,Cleveland Cavaliers,upcoming,draftkings,5.5,-5.5,1.93,1.89,243.5,1.93,1.89,2.7,1.49
-2025-12-18_MEM@MIN,2025-12-18,2025-12-18T01:10:00Z,Minnesota Timberwolves,Memphis Grizzlies,upcoming,draftkings,-7.5,7.5,1.91,1.91,233.5,1.95,1.87,1.34,3.35
-2025-12-19_ATL@CHA,2025-12-19,2025-12-19T00:10:00Z,Charlotte Hornets,Atlanta Hawks,upcoming,fanduel,4.5,-4.5,1.91,1.91,231.5,1.93,1.89,2.56,1.54
-2025-12-19_MIA@BKN,2025-12-19,2025-12-19T00:40:00Z,Brooklyn Nets,Miami Heat,upcoming,draftkings,7.5,-7.5,1.91,1.91,227.5,1.91,1.91,3.3,1.35
-2025-12-19_HOU@NO,2025-12-19,2025-12-19T01:10:00Z,New Orleans Pelicans,Houston Rockets,upcoming,draftkings,9.5,-9.5,1.95,1.87,234.5,1.91,1.91,4.3,1.24
-2025-12-19_LAC@OKC,2025-12-19,2025-12-19T01:10:00Z,Oklahoma City Thunder,Los Angeles Clippers,upcoming,fanduel,-15.5,15.5,1.91,1.91,223.5,1.89,1.93,1.11,7.4
-2025-12-19_TOR@MIL,2025-12-19,2025-12-19T01:10:00Z,Milwaukee Bucks,Toronto Raptors,upcoming,fanduel,4.5,-4.5,1.91,1.91,219.5,1.91,1.91,2.58,1.53
-2025-12-19_DET@DAL,2025-12-19,2025-12-19T01:40:00Z,Dallas Mavericks,Detroit Pistons,upcoming,fanduel,5.5,-5.5,1.93,1.89,231.5,1.91,1.91,2.9,1.44
-2025-12-19_ORL@DEN,2025-12-19,2025-12-19T02:10:00Z,Denver Nuggets,Orlando Magic,upcoming,fanduel,-7.5,7.5,1.91,1.91,232.5,1.89,1.93,1.36,3.3
-2025-12-19_GS@PHX,2025-12-19,2025-12-19T02:10:00Z,Phoenix Suns,Golden State Warriors,upcoming,fanduel,1.0,-1.0,1.91,1.91,229.5,1.89,1.93,1.98,1.85
-2025-12-19_LAL@UTAH,2025-12-19,2025-12-19T02:10:00Z,Utah Jazz,Los Angeles Lakers,upcoming,draftkings,6.5,-6.5,1.91,1.91,241.5,1.91,1.91,3.0,1.41
-2025-12-19_SAC@POR,2025-12-19,2025-12-19T03:10:00Z,Portland Trail Blazers,Sacramento Kings,upcoming,fanduel,-7.5,7.5,1.91,1.91,236.5,1.89,1.93,1.34,3.35
+game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
+2025-12-19_ATL@CHA,2025-12-19,2025-12-19T00:10:00Z,Charlotte Hornets,Atlanta Hawks,upcoming,draftkings,5.5,-5.5,1.87,1.95,237.5,1.93,1.89,1.46,2.8
+2025-12-19_NY@IND,2025-12-19,2025-12-19T00:10:00Z,Indiana Pacers,New York Knicks,upcoming,draftkings,3.5,-3.5,1.95,1.87,225.5,1.95,1.87,1.59,2.42
+2025-12-19_MIA@BKN,2025-12-19,2025-12-19T00:40:00Z,Brooklyn Nets,Miami Heat,upcoming,draftkings,6.5,-6.5,1.87,1.95,227.5,1.91,1.91,1.4,3.05
+2025-12-19_HOU@NO,2025-12-19,2025-12-19T01:10:00Z,New Orleans Pelicans,Houston Rockets,upcoming,draftkings,9.5,-9.5,1.95,1.87,234.5,1.95,1.87,1.24,4.3
+2025-12-19_LAC@OKC,2025-12-19,2025-12-19T01:10:00Z,Oklahoma City Thunder,Los Angeles Clippers,upcoming,draftkings,-17.5,17.5,1.89,1.93,220.5,1.91,1.91,10.5,1.06
+2025-12-19_TOR@MIL,2025-12-19,2025-12-19T01:10:00Z,Milwaukee Bucks,Toronto Raptors,upcoming,draftkings,5.5,-5.5,1.87,1.95,219.5,1.91,1.91,1.46,2.8
+2025-12-19_WSH@SA,2025-12-19,2025-12-19T01:10:00Z,San Antonio Spurs,Washington Wizards,upcoming,draftkings,-14.5,14.5,1.95,1.87,241.5,1.93,1.89,7.5,1.1
+2025-12-19_DET@DAL,2025-12-19,2025-12-19T01:40:00Z,Dallas Mavericks,Detroit Pistons,upcoming,draftkings,5.5,-5.5,1.91,1.91,229.5,1.87,1.95,1.43,2.9
+2025-12-19_ORL@DEN,2025-12-19,2025-12-19T02:10:00Z,Denver Nuggets,Orlando Magic,upcoming,draftkings,-7.5,7.5,1.89,1.93,236.5,1.89,1.93,3.45,1.33
+2025-12-19_GS@PHX,2025-12-19,2025-12-19T02:10:00Z,Phoenix Suns,Golden State Warriors,upcoming,draftkings,2.5,-2.5,1.89,1.93,230.5,1.91,1.91,1.77,2.1
+2025-12-19_LAL@UTAH,2025-12-19,2025-12-19T02:10:00Z,Utah Jazz,Los Angeles Lakers,upcoming,draftkings,7.5,-7.5,1.87,1.95,243.5,1.93,1.89,1.34,3.4
+2025-12-19_SAC@POR,2025-12-19,2025-12-19T03:10:00Z,Portland Trail Blazers,Sacramento Kings,upcoming,draftkings,-8.5,8.5,1.87,1.95,238.5,1.95,1.87,3.8,1.28
