@@ -5,11 +5,11 @@ import pandas as pd
 # DATABASE CONFIG
 # ============================================================================
 DB_CONFIG = {
-    'host': 'winbets-predictions.postgres.database.azure.com',
-    'port': 5432,
-    'database': 'postgres',
-    'user': 'winbets',
-    'password': 'Constantinople@1900'
+    'host': os.environ.get('DB_HOST'),
+    'port': int(os.environ.get('DB_PORT', 5432)),
+    'database': os.environ.get('DB_DATABASE'),
+    'user': os.environ.get('DB_USER'),
+    'password': os.environ.get('DB_PASSWORD')
 }
 
 print("="*80)
