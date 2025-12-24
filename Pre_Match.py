@@ -514,7 +514,7 @@ class PreMatchFeatureEngine:
         
         return comparative
     
-    def process_upcoming_games(self, days_ahead: int = 1, recent_games_count: int = 5) -> List[Dict]:
+    def process_upcoming_games(self, days_ahead: int = 2, recent_games_count: int = 5) -> List[Dict]:
         """
         Main pipeline: Fetch upcoming games and enrich with features
         
@@ -557,7 +557,7 @@ def main():
     
     # Configuration
     CONFIG = {
-        'days_ahead': 1,           # Today + tomorrow
+        'days_ahead': 2,           # Today + tomorrow
         'recent_games_count': 5,   # Last 5 games for each team
     }
     
@@ -636,6 +636,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
