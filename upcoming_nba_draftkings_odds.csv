@@ -1,6 +1,6 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
-2025-12-25_CLE@NY,2025-12-25,2025-12-25T17:00:00Z,New York Knicks,Cleveland Cavaliers,upcoming,draftkings,-6.5,6.5,1.93,1.89,237.5,1.91,1.91,2.85,1.44
-2025-12-25_SA@OKC,2025-12-25,2025-12-25T19:30:00Z,Oklahoma City Thunder,San Antonio Spurs,upcoming,draftkings,-9.5,9.5,1.95,1.87,236.5,1.95,1.87,3.6,1.31
-2025-12-25_DAL@GS,2025-12-25,2025-12-25T22:00:00Z,Golden State Warriors,Dallas Mavericks,upcoming,draftkings,-8.5,8.5,2.02,1.82,227.5,1.89,1.93,3.6,1.31
-2025-12-26_HOU@LAL,2025-12-26,2025-12-26T01:00:00Z,Los Angeles Lakers,Houston Rockets,upcoming,draftkings,3.5,-3.5,1.87,1.95,228.5,1.89,1.93,1.56,2.5
-2025-12-26_MIN@DEN,2025-12-26,2025-12-26T03:30:00Z,Denver Nuggets,Minnesota Timberwolves,upcoming,draftkings,-4.5,4.5,1.95,1.87,237.5,1.89,1.93,2.5,1.56
+2025-12-25_CLE@NY,2025-12-25,2025-12-25T17:00:00Z,New York Knicks,Cleveland Cavaliers,upcoming,draftkings,-5.5,5.5,1.93,1.89,238.5,1.87,1.95,2.8,1.46
+2025-12-25_SA@OKC,2025-12-25,2025-12-25T19:30:00Z,Oklahoma City Thunder,San Antonio Spurs,upcoming,draftkings,-9.5,9.5,1.98,1.85,234.5,1.95,1.87,3.85,1.28
+2025-12-25_DAL@GS,2025-12-25,2025-12-25T22:00:00Z,Golden State Warriors,Dallas Mavericks,upcoming,draftkings,-8.5,8.5,1.95,1.87,228.5,1.93,1.89,3.7,1.29
+2025-12-26_HOU@LAL,2025-12-26,2025-12-26T01:00:00Z,Los Angeles Lakers,Houston Rockets,upcoming,draftkings,2.5,-2.5,1.93,1.89,230.5,1.89,1.93,1.7,2.2
+2025-12-26_MIN@DEN,2025-12-26,2025-12-26T03:30:00Z,Denver Nuggets,Minnesota Timberwolves,upcoming,draftkings,-2.5,2.5,1.89,1.93,239.5,1.91,1.91,2.2,1.7
