@@ -1,10 +1,8 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
-2025-12-27_DAL@SAC,2025-12-27,2025-12-27T22:10:00Z,Sacramento Kings,Dallas Mavericks,upcoming,draftkings,2.5,-2.5,1.95,1.87,231.5,1.91,1.91,1.7,2.2
-2025-12-28_DEN@ORL,2025-12-28,2025-12-28T00:10:00Z,Orlando Magic,Denver Nuggets,upcoming,draftkings,5.5,-5.5,1.89,1.93,234.5,1.89,1.93,1.49,2.7
-2025-12-28_PHX@NO,2025-12-28,2025-12-28T00:10:00Z,New Orleans Pelicans,Phoenix Suns,upcoming,draftkings,5.5,-5.5,1.95,1.87,238.5,1.93,1.89,1.44,2.85
-2025-12-28_NY@ATL,2025-12-28,2025-12-28T01:10:00Z,Atlanta Hawks,New York Knicks,upcoming,draftkings,6.5,-6.5,1.85,1.98,242.5,1.87,1.95,1.46,2.8
-2025-12-28_BKN@MIN,2025-12-28,2025-12-28T01:10:00Z,Minnesota Timberwolves,Brooklyn Nets,upcoming,draftkings,-9.5,9.5,1.91,1.91,224.5,1.93,1.89,4.0,1.26
-2025-12-28_MIL@CHI,2025-12-28,2025-12-28T01:10:00Z,Chicago Bulls,Milwaukee Bucks,upcoming,draftkings,-6.5,6.5,1.95,1.87,233.5,1.91,1.91,3.05,1.4
-2025-12-28_CLE@HOU,2025-12-28,2025-12-28T01:10:00Z,Houston Rockets,Cleveland Cavaliers,upcoming,draftkings,-4.5,4.5,1.89,1.93,235.5,1.93,1.89,2.64,1.51
-2025-12-28_IND@MIA,2025-12-28,2025-12-28T01:10:00Z,Miami Heat,Indiana Pacers,upcoming,draftkings,-8.5,8.5,1.91,1.91,230.5,1.89,1.93,3.75,1.29
-2025-12-28_UTAH@SA,2025-12-28,2025-12-28T01:10:00Z,San Antonio Spurs,Utah Jazz,upcoming,draftkings,-16.5,16.5,1.93,1.89,247.5,1.95,1.87,9.0,1.07
+2025-12-28_GS@TOR,2025-12-28,2025-12-28T20:40:00Z,Toronto Raptors,Golden State Warriors,upcoming,draftkings,4.5,-4.5,1.93,1.89,223.5,1.87,1.95,1.57,2.45
+2025-12-28_PHI@OKC,2025-12-28,2025-12-28T20:40:00Z,Oklahoma City Thunder,Philadelphia 76ers,upcoming,draftkings,-14.5,14.5,1.91,1.91,226.5,1.95,1.87,7.0,1.11
+2025-12-28_BOS@POR,2025-12-28,2025-12-28T23:10:00Z,Portland Trail Blazers,Boston Celtics,upcoming,draftkings,6.5,-6.5,1.87,1.95,228.5,1.89,1.93,1.43,2.9
+2025-12-28_MEM@WSH,2025-12-28,2025-12-28T23:10:00Z,Washington Wizards,Memphis Grizzlies,upcoming,draftkings,6.5,-6.5,1.91,1.91,238.5,1.91,1.91,1.38,3.15
+2025-12-29_DET@LAC,2025-12-29,2025-12-29T02:10:00Z,Los Angeles Clippers,Detroit Pistons,upcoming,draftkings,3.5,-3.5,1.91,1.91,224.5,1.91,1.91,1.65,2.3
+2025-12-29_SAC@LAL,2025-12-29,2025-12-29T02:40:00Z,Los Angeles Lakers,Sacramento Kings,upcoming,draftkings,-12.5,12.5,1.95,1.87,233.5,1.95,1.87,5.7,1.15
+2025-12-30_CLE@SA,2025-12-30,2025-12-30T01:10:00Z,San Antonio Spurs,Cleveland Cavaliers,upcoming,fanduel,-5.0,5.0,1.91,1.91,242.5,1.91,1.91,2.66,1.51
