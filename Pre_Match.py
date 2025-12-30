@@ -3,7 +3,7 @@ NBA Pre-Match Feature Engineering
 Fetches upcoming games and enriches them with recent team performance data
 
 Features included:
-- Today's and tomorrow's games
+- Yesterday's, today's and tomorrow's games
 - Recent team statistics (last N games)
 - Home/away splits
 - Team season averages
@@ -190,7 +190,7 @@ class PreMatchFeatureEngine:
     
     def get_upcoming_games(self, days_ahead: int = 1) -> List[Dict]:
         """
-        Get games for today and the next N days (in UTC)
+        Get games for yesterday, today and the next N days (in UTC)
         
         Args:
             days_ahead: Number of days to look ahead (default 1 = today + tomorrow in UTC)
@@ -208,7 +208,7 @@ class PreMatchFeatureEngine:
         print(f"Current UTC time: {utc_now.strftime('%Y-%m-%d %H:%M:%S UTC')}")
         print(f"Your local time:  {local_now.strftime('%Y-%m-%d %H:%M:%S')}\n")
         
-        for day_offset in range(days_ahead):
+        for day_offset in range(-1, days_ahead):
             utc_date = utc_now + timedelta(days=day_offset)
             date_str = utc_date.strftime("%Y-%m-%d")
             print(f"Checking {date_str} UTC ({utc_date.strftime('%A')})...")
@@ -636,8 +636,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
