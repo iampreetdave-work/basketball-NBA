@@ -346,45 +346,35 @@ results_df['grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x
 results_df['ou_grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x, 'ou'))
 
 # ============================================================================
-# SPREAD COVERAGE PREDICTION
+# SPREAD COVERAGE PREDICTION - NEW LOGIC
 # ============================================================================
-# Logic: Check if the PREDICTED team covers THEIR spread
+# Logic: Calculate delta = home_points_predicted - away_points_predicted
+#        Normalize home_spread (strip +/- signs)
+#        If delta >= spread: TRUE, else FALSE
 
 def calculate_spread_covered_predicted(row):
     """
-    Calculate if PREDICTED team covers their spread
+    Calculate if spread is covered based on absolute delta vs normalized home_spread
     
-    Args:
-        row: DataFrame row with columns:
-            - home_points_predicted
-            - away_points_predicted  
-            - home_spread (SIGNED)
-            - away_spread (SIGNED)
-            - ml_prediction ('Home Win' or 'Away Win')
-    
-    Returns:
-        'TRUE' if predicted team covers spread, 'FALSE' if doesn't cover, None if no spread data
+    Logic:
+    - delta = home_points_predicted - away_points_predicted
+    - Normalize home_spread (strip +/- signs to get absolute value)
+    - if abs(delta) >= normalized_spread: TRUE
+    - if abs(delta) < normalized_spread: FALSE
     """
     
     # Skip if no spread data
-    if pd.isna(row['home_spread']) or pd.isna(row['away_spread']):
+    if pd.isna(row['home_spread']):
         return None
     
-    # Calculate SIGNED margin (home perspective)
-    margin = row['home_points_predicted'] - row['away_points_predicted']
+    # Calculate delta
+    delta = row['home_points_predicted'] - row['away_points_predicted']
     
-    # Check which team was predicted to win
-    if row['ml_prediction'] == 'Home Win':
-        # Check HOME team's spread
-        spread_value = float(row['home_spread'])
-        threshold = -spread_value
-        return 'TRUE' if margin > threshold else 'FALSE'
-    else:  # 'Away Win'
-        # Check AWAY team's spread
-        away_margin = -margin  # Away margin is opposite of home margin
-        spread_value = float(row['away_spread'])
-        threshold = -spread_value
-        return 'TRUE' if away_margin > threshold else 'FALSE'
+    # Normalize spread (strip +/- signs, use absolute value)
+    spread_value = abs(float(row['home_spread']))
+    
+    # Compare absolute delta with spread
+    return 'TRUE' if abs(delta) >= spread_value else 'FALSE'
 
 results_df['spread_covered_predicted'] = results_df.apply(calculate_spread_covered_predicted, axis=1)
 
