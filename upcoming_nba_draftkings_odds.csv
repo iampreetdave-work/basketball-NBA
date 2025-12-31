@@ -1,5 +1,10 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2025-12-31_PHI@MEM,2025-12-31,2025-12-31T01:10:00Z,Memphis Grizzlies,Philadelphia 76ers,upcoming,draftkings,1.5,-1.5,1.87,1.95,232.5,1.93,1.89,2.0,1.83
-2025-12-31_BOS@UTAH,2025-12-31,2025-12-31T02:10:00Z,Utah Jazz,Boston Celtics,upcoming,draftkings,7.5,-7.5,1.91,1.91,240.5,1.91,1.91,3.5,1.32
-2025-12-31_DET@LAL,2025-12-31,2025-12-31T03:40:00Z,Los Angeles Lakers,Detroit Pistons,upcoming,draftkings,2.5,-2.5,1.87,1.95,231.5,1.91,1.91,2.1,1.77
-2025-12-31_SAC@LAC,2025-12-31,2025-12-31T04:10:00Z,Los Angeles Clippers,Sacramento Kings,upcoming,draftkings,-10.5,10.5,1.98,1.85,221.5,1.87,1.95,1.23,4.4
+2025-12-31_GS@CHA,2025-12-31,2025-12-31T18:10:00Z,Charlotte Hornets,Golden State Warriors,upcoming,draftkings,6.5,-6.5,1.95,1.87,232.5,1.87,1.95,3.3,1.35
+2025-12-31_MIN@ATL,2025-12-31,2025-12-31T20:10:00Z,Atlanta Hawks,Minnesota Timberwolves,upcoming,draftkings,4.5,-4.5,1.89,1.93,243.5,1.91,1.91,2.6,1.52
+2025-12-31_ORL@IND,2025-12-31,2025-12-31T20:10:00Z,Indiana Pacers,Orlando Magic,upcoming,draftkings,3.5,-3.5,1.95,1.87,225.5,1.91,1.91,2.4,1.6
+2025-12-31_PHX@CLE,2025-12-31,2025-12-31T20:40:00Z,Cleveland Cavaliers,Phoenix Suns,upcoming,draftkings,-5.5,5.5,1.85,1.98,235.5,1.93,1.89,1.42,2.95
+2026-01-01_NO@CHI,2026-01-01,2026-01-01T00:10:00Z,Chicago Bulls,New Orleans Pelicans,upcoming,draftkings,1.5,-1.5,1.89,1.93,245.5,1.95,1.87,1.95,1.87
+2026-01-01_NY@SA,2026-01-01,2026-01-01T00:10:00Z,San Antonio Spurs,New York Knicks,upcoming,draftkings,-1.5,1.5,1.93,1.89,237.5,1.95,1.87,1.85,1.98
+2026-01-01_DEN@TOR,2026-01-01,2026-01-01T00:40:00Z,Toronto Raptors,Denver Nuggets,upcoming,draftkings,-7.5,7.5,1.91,1.91,224.5,1.91,1.91,1.34,3.35
+2026-01-01_WSH@MIL,2026-01-01,2026-01-01T01:10:00Z,Milwaukee Bucks,Washington Wizards,upcoming,draftkings,-10.5,10.5,1.89,1.93,231.5,1.93,1.89,1.18,5.1
+2026-01-01_POR@OKC,2026-01-01,2026-01-01T01:10:00Z,Oklahoma City Thunder,Portland Trail Blazers,upcoming,draftkings,-15.5,15.5,1.89,1.93,233.5,1.91,1.91,1.08,8.5
