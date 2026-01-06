@@ -31,6 +31,17 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           CSV_FILE: NBA_PREDICTIONS_ML.csv
         run: python save.py
+
+      - name: save features
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          CSV_FILE: NBA_PREDICTIONS_ML.csv , Future.csv
+
+        run: python features_store.py
       
       - name: Log success
         if: success()
