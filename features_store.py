@@ -233,7 +233,7 @@ def insert_data_to_db(df_clean):
         update_str = ', '.join([f"{col} = EXCLUDED.{col}" for col in db_columns if col != 'game_identifier'])
         
         query = f"""
-            INSERT INTO historical_features_NBA ({columns_str})
+            INSERT INTO "historical_features_NBA" ({columns_str})
             VALUES %s
             ON CONFLICT (game_identifier) DO UPDATE SET
             {update_str}
