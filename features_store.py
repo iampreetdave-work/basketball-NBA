@@ -168,7 +168,7 @@ def prepare_data_for_db(df):
     result_df = pd.DataFrame(result_data)
     
     # Handle NaN and infinity
-    result_df = result_df.fillna(None)
+    result_df = result_df.where(pd.notna(result_df), None)
     result_df = result_df.replace([np.inf, -np.inf], None)
     
     print(f"✓ Prepared {len(result_df)} records with all features")
