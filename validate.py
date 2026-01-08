@@ -434,7 +434,7 @@ def validate_with_actual_data():
         
         # Query for PENDING records
         query = f"""
-            SELECT * FROM {TABLE_NAME}
+            SELECT * FROM "{TABLE_NAME}"
             WHERE status = 'PENDING'
             ORDER BY game_identifier
         """
@@ -459,7 +459,7 @@ def validate_with_actual_data():
     try:
         # Query for match_ids
         query = f"""
-            SELECT game_identifier, match_id FROM {HISTORICAL_TABLE}
+            SELECT game_identifier, match_id FROM "{HISTORICAL_TABLE}"
             ORDER BY game_identifier
         """
         
@@ -841,7 +841,7 @@ def validate_with_actual_data():
         
         try:
             update_query = f"""
-            UPDATE {TABLE_NAME}
+            UPDATE "{TABLE_NAME}"
             SET home_points_actual = %s,
                 away_points_actual = %s,
                 total_points_actual = %s,
