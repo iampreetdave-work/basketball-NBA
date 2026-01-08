@@ -352,28 +352,55 @@ results_df['ou_grade'] = results_df['ml_confidence'].apply(lambda x: assign_grad
 #        Normalize home_spread (strip +/- signs)
 #        If delta >= spread: TRUE, else FALSE
 
+def calculate_home_spread_covered_predicted(row):
+    """
+    Calculate if HOME team covered their spread
+    Logic: delta > -home_spread
+    Works for both positive (underdog) and negative (favored) spreads
+    """
+    if pd.isna(row['home_spread']) or pd.isna(row['home_points_predicted']) or pd.isna(row['away_points_predicted']):
+        return None
+    
+    try:
+        delta = row['home_points_predicted'] - row['away_points_predicted']
+        spread_val = float(row['home_spread'])
+        return delta > -spread_val
+    except (ValueError, TypeError):
+        return None
+
+def calculate_away_spread_covered_predicted(row):
+    """
+    Calculate if AWAY team covered their spread
+    Logic: delta < -away_spread
+    Works for both positive (favored) and negative (underdog) spreads
+    """
+    if pd.isna(row['away_spread']) or pd.isna(row['home_points_predicted']) or pd.isna(row['away_points_predicted']):
+        return None
+    
+    try:
+        delta = row['home_points_predicted'] - row['away_points_predicted']
+        spread_val = float(row['away_spread'])
+        return delta < -spread_val
+    except (ValueError, TypeError):
+        return None
+
+results_df['home_spread_covered_predicted'] = results_df.apply(calculate_home_spread_covered_predicted, axis=1)
+results_df['away_spread_covered_predicted'] = results_df.apply(calculate_away_spread_covered_predicted, axis=1)
+
+# ============================================================================
+# OLD SPREAD COVERAGE PREDICTION - KEEP FOR BACKWARD COMPATIBILITY
+# ============================================================================
+
 def calculate_spread_covered_predicted(row):
     """
     Calculate if spread is covered based on absolute delta vs normalized home_spread
-    
-    Logic:
-    - delta = home_points_predicted - away_points_predicted
-    - Normalize home_spread (strip +/- signs to get absolute value)
-    - if abs(delta) >= normalized_spread: TRUE
-    - if abs(delta) < normalized_spread: FALSE
+    OLD LOGIC: kept for backward compatibility
     """
-    
-    # Skip if no spread data
     if pd.isna(row['home_spread']):
         return None
     
-    # Calculate delta
     delta = row['home_points_predicted'] - row['away_points_predicted']
-    
-    # Normalize spread (strip +/- signs, use absolute value)
     spread_value = abs(float(row['home_spread']))
-    
-    # Compare absolute delta with spread
     return 'TRUE' if abs(delta) >= spread_value else 'FALSE'
 
 results_df['spread_covered_predicted'] = results_df.apply(calculate_spread_covered_predicted, axis=1)
@@ -384,23 +411,23 @@ results_df['spread_covered_predicted'] = results_df.apply(calculate_spread_cover
 
 def calculate_spread_grade_v2(row):
     """
-    Calculate spread_grade based on ml_confidence and spread_covered_predicted
+    Calculate spread_grade based on ml_confidence and home_spread_covered_predicted
     
     First: Determine ML grade from confidence thresholds
     Then: Apply spread grading logic
     
     Logic:
-        if spread_covered_predicted == TRUE and grade in ['A', 'B']:
+        if home_spread_covered_predicted == TRUE and grade in ['A', 'B']:
             spread_grade = 'A'
-        elif spread_covered_predicted == TRUE and grade in ['C', 'D']:
+        elif home_spread_covered_predicted == TRUE and grade in ['C', 'D']:
             spread_grade = 'B'
-        elif spread_covered_predicted == FALSE and grade in ['A', 'B']:
+        elif home_spread_covered_predicted == FALSE and grade in ['A', 'B']:
             spread_grade = 'C'
         else:  # FALSE and C/D
             spread_grade = 'D'
     """
     confidence = row['ml_confidence']
-    spread_pred = row['spread_covered_predicted']
+    spread_pred = row['home_spread_covered_predicted']
     
     # Get ML grade from confidence
     if confidence >= 85:
@@ -444,8 +471,8 @@ results_df.rename(columns={
 }, inplace=True)
 
 # Add empty columns for validation (filled during validation process)
-results_df['spread_pnl'] = None
 results_df['spread_covered_actual'] = None
+results_df['spread_pnl'] = None
 
 # Reorder columns to match exact requested order
 final_columns = [
@@ -462,8 +489,10 @@ final_columns = [
     'home_spread', 'away_spread',
     'home_spread_odds', 'away_spread_odds',
     'over_odds', 'under_odds',
-    'spread_pnl',
-    'spread_covered_predicted', 'spread_covered_actual'
+    'spread_covered_predicted', 'spread_covered_actual',
+    'home_spread_covered_predicted', 'home_spread_covered_actual',
+    'away_spread_covered_predicted', 'away_spread_covered_actual',
+    'spread_pnl', 'home_spread_pnl', 'away_spread_pnl'
 ]
 
 results_df = results_df[final_columns]
@@ -530,7 +559,7 @@ print("-"*80)
 display_cols = ['home_team', 'away_team', 'home_points_predicted', 'away_points_predicted', 
                 'total_points_predicted', 'ml_prediction', 'ml_probability', 'ml_confidence',
                 'grade', 'ou_grade', 'spread_grade', 'ou_predicted', 'home_spread', 'away_spread', 
-                'spread_covered_predicted', 'status']
+                'home_spread_covered_predicted', 'away_spread_covered_predicted', 'status']
 
 if 'ml_actual' in results_df.columns:
     display_cols.extend(['ml_actual', 'ml_correct', 'ml_pnl'])
