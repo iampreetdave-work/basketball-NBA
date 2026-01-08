@@ -1,13 +1,5 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2026-01-08_DEN@BOS,2026-01-08,2026-01-08T00:10:00Z,Boston Celtics,Denver Nuggets,upcoming,draftkings,-9.5,9.5,1.93,1.89,229.5,1.87,1.95,1.27,3.95
-2026-01-08_TOR@CHA,2026-01-08,2026-01-08T00:10:00Z,Charlotte Hornets,Toronto Raptors,upcoming,draftkings,2.5,-2.5,1.91,1.91,230.5,1.95,1.87,2.14,1.74
-2026-01-08_CHI@DET,2026-01-08,2026-01-08T00:10:00Z,Detroit Pistons,Chicago Bulls,upcoming,draftkings,-10.5,10.5,1.93,1.89,234.5,1.91,1.91,1.22,4.5
-2026-01-08_WSH@PHI,2026-01-08,2026-01-08T00:10:00Z,Philadelphia 76ers,Washington Wizards,upcoming,draftkings,-12.5,12.5,1.95,1.87,235.5,1.91,1.91,1.16,5.55
-2026-01-08_NO@ATL,2026-01-08,2026-01-08T00:40:00Z,Atlanta Hawks,New Orleans Pelicans,upcoming,draftkings,-10.5,10.5,1.91,1.91,245.5,1.89,1.93,1.21,4.6
-2026-01-08_ORL@BKN,2026-01-08,2026-01-08T00:40:00Z,Brooklyn Nets,Orlando Magic,upcoming,draftkings,1.5,-1.5,1.98,1.85,222.5,1.87,1.95,2.1,1.77
-2026-01-08_LAC@NY,2026-01-08,2026-01-08T00:40:00Z,New York Knicks,Los Angeles Clippers,upcoming,draftkings,-5.5,5.5,1.87,1.95,224.5,1.87,1.95,1.44,2.85
-2026-01-08_PHX@MEM,2026-01-08,2026-01-08T01:10:00Z,Memphis Grizzlies,Phoenix Suns,upcoming,draftkings,4.5,-4.5,1.93,1.89,230.5,1.91,1.91,2.54,1.54
-2026-01-08_UTAH@OKC,2026-01-08,2026-01-08T01:10:00Z,Oklahoma City Thunder,Utah Jazz,upcoming,draftkings,-17.5,17.5,1.87,1.95,241.5,1.87,1.95,1.09,8.0
-2026-01-08_LAL@SA,2026-01-08,2026-01-08T02:40:00Z,San Antonio Spurs,Los Angeles Lakers,upcoming,draftkings,-7.5,7.5,1.87,1.95,233.5,1.91,1.91,1.35,3.3
-2026-01-08_MIL@GS,2026-01-08,2026-01-08T03:10:00Z,Golden State Warriors,Milwaukee Bucks,upcoming,draftkings,-6.5,6.5,1.91,1.91,229.5,1.91,1.91,1.39,3.1
-2026-01-08_HOU@POR,2026-01-08,2026-01-08T03:10:00Z,Portland Trail Blazers,Houston Rockets,upcoming,draftkings,6.5,-6.5,1.87,1.95,225.5,1.93,1.89,3.1,1.39
+2026-01-09_IND@CHA,2026-01-09,2026-01-09T00:10:00Z,Charlotte Hornets,Indiana Pacers,upcoming,draftkings,-3.5,3.5,1.89,1.93,232.5,1.87,1.95,1.6,2.4
+2026-01-09_MIA@CHI,2026-01-09,2026-01-09T01:10:00Z,Chicago Bulls,Miami Heat,upcoming,draftkings,7.5,-7.5,1.87,1.95,240.5,1.87,1.95,3.15,1.38
+2026-01-09_CLE@MIN,2026-01-09,2026-01-09T01:10:00Z,Minnesota Timberwolves,Cleveland Cavaliers,upcoming,draftkings,-2.5,2.5,1.89,1.93,240.5,1.91,1.91,1.7,2.2
+2026-01-09_DAL@UTAH,2026-01-09,2026-01-09T02:10:00Z,Utah Jazz,Dallas Mavericks,upcoming,draftkings,7.5,-7.5,1.87,1.95,240.5,1.93,1.89,3.1,1.39
