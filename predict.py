@@ -87,10 +87,6 @@ if 'home_insufficient_data' in df.columns and 'away_insufficient_data' in df.col
     df = df[(df['home_insufficient_data'] == False) & (df['away_insufficient_data'] == False)].copy()
     print(f"  ✓ Filtered by data sufficiency flags")
 
-# Handle total_line - add if missing (for live predictions)
-#if 'total_line' not in df.columns:
-#    df['total_line'] = df['home_recent_ppg'] + df['away_recent_ppg']
-
 critical_cols = ['home_recent_ppg', 'away_recent_ppg', 
                  'home_winning_odds_decimal', 'away_winning_odds_decimal', 'total_line_o']
 df = df.dropna(subset=critical_cols).copy()
@@ -199,7 +195,6 @@ print("\n[5/5] Compiling results...")
 results_df = pd.DataFrame()
 
 # Core columns - exact order as requested
-# Random 1 to 7 incrementer logic - same as original
 results_df['id'] = range(1, len(df) + 1)
 
 # Generate game_identifier
@@ -274,7 +269,7 @@ results_df['ou_predicted'] = np.where(
 results_df['home_win_odds'] = df['home_winning_odds_decimal'].values.round(2) if 'home_winning_odds_decimal' in df.columns else 0.0
 results_df['away_win_odds'] = df['away_winning_odds_decimal'].values.round(2) if 'away_winning_odds_decimal' in df.columns else 0.0
 
-# New spreads and totals columns from Future.csv (8 columns)
+# New spreads and totals columns from Future.csv
 results_df['home_spread'] = df['home_spread'].values if 'home_spread' in df.columns else None
 results_df['away_spread'] = df['away_spread'].values if 'away_spread' in df.columns else None
 results_df['home_spread_odds_decimal'] = df['home_spread_odds_decimal'].values.round(2) if 'home_spread_odds_decimal' in df.columns else None
@@ -282,7 +277,6 @@ results_df['away_spread_odds_decimal'] = df['away_spread_odds_decimal'].values.r
 results_df['total_line_o'] = df['total_line_o'].values if 'total_line_o' in df.columns else None
 results_df['total_line_over_odds_decimal'] = df['total_line_over_odds_decimal'].values.round(2) if 'total_line_over_odds_decimal' in df.columns else None
 results_df['total_line_under_odds_decimal'] = df['total_line_under_odds_decimal'].values.round(2) if 'total_line_under_odds_decimal' in df.columns else None
-results_df['total_line_o'] = df['total_line_o'].values if 'total_line_o' in df.columns else None
 
 # ML correct (null initially, filled during validation)
 results_df['ml_correct'] = None
@@ -346,15 +340,12 @@ results_df['grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x
 results_df['ou_grade'] = results_df['ml_confidence'].apply(lambda x: assign_grade(x, 'ou'))
 
 # ============================================================================
-# SPREAD COVERAGE PREDICTION - NEW LOGIC
+# SPREAD COVERAGE PREDICTION - PREDICTED COLUMNS ONLY
 # ============================================================================
-# Logic: Calculate delta = home_points_predicted - away_points_predicted
-#        Normalize home_spread (strip +/- signs)
-#        If delta >= spread: TRUE, else FALSE
 
 def calculate_home_spread_covered_predicted(row):
     """
-    Calculate if HOME team covered their spread
+    Calculate if HOME team covered their spread (PREDICTION)
     Logic: delta > -home_spread
     Works for both positive (underdog) and negative (favored) spreads
     """
@@ -370,7 +361,7 @@ def calculate_home_spread_covered_predicted(row):
 
 def calculate_away_spread_covered_predicted(row):
     """
-    Calculate if AWAY team covered their spread
+    Calculate if AWAY team covered their spread (PREDICTION)
     Logic: delta < -away_spread
     Works for both positive (favored) and negative (underdog) spreads
     """
@@ -470,11 +461,12 @@ results_df.rename(columns={
     'total_line_under_odds_decimal': 'under_odds'
 }, inplace=True)
 
-# Add empty columns for validation (filled during validation process)
-results_df['spread_covered_actual'] = None
-results_df['spread_pnl'] = None
+# ============================================================================
+# NOTE: Actual and PnL columns are NOT created here
+# They will be added during validation when actual results are available
+# ============================================================================
 
-# Reorder columns to match exact requested order
+# Reorder columns - NO actual or PnL columns
 final_columns = [
     'id', 'date', 'league', 'game_identifier', 'home_id', 'home_team', 'away_id', 'away_team',
     'home_points_predicted', 'home_points_actual',
@@ -489,10 +481,8 @@ final_columns = [
     'home_spread', 'away_spread',
     'home_spread_odds', 'away_spread_odds',
     'over_odds', 'under_odds',
-    'spread_covered_predicted', 'spread_covered_actual',
-    'home_spread_covered_predicted', 'home_spread_covered_actual',
-    'away_spread_covered_predicted', 'away_spread_covered_actual',
-    'spread_pnl', 'home_spread_pnl', 'away_spread_pnl'
+    'spread_covered_predicted',
+    'home_spread_covered_predicted', 'away_spread_covered_predicted'
 ]
 
 results_df = results_df[final_columns]
@@ -510,39 +500,11 @@ print("\n" + "="*80)
 print("📊 PREDICTION SUMMARY")
 print("="*80)
 
-if 'ml_correct' in results_df.columns and results_df['ml_correct'].notna().any():
-    correct_count = results_df['ml_correct'].sum()
-    accuracy = (correct_count / results_df['ml_correct'].notna().sum() * 100) if results_df['ml_correct'].notna().any() else 0
-    print(f"\n💰 MONEYLINE PREDICTIONS")
-    print(f"  Accuracy:             {accuracy:.2f}%")
-    print(f"  Correct:              {correct_count}/{results_df['ml_correct'].notna().sum()}")
-else:
-    print(f"\n💰 MONEYLINE PREDICTIONS")
-    print(f"  Status:               Pending validation (actual results will be filled during API calls)")
+print(f"\n💰 MONEYLINE PREDICTIONS")
+print(f"  Status:               Pending validation (actual results will be filled during API calls)")
 
-if 'ml_pnl' in results_df.columns and results_df['ml_pnl'].notna().any():
-    total_pnl = results_df['ml_pnl'].sum()
-    print(f"  Total PnL:            {total_pnl:.2f}")
-    print(f"  Avg PnL/Bet:          {results_df['ml_pnl'].mean():.4f}")
-else:
-    print(f"  PnL:                  Pending validation")
-
-if 'ou_correct' in results_df.columns and results_df['ou_correct'].notna().any():
-    ou_correct_count = results_df['ou_correct'].sum()
-    ou_accuracy = (ou_correct_count / results_df['ou_correct'].notna().sum() * 100) if results_df['ou_correct'].notna().any() else 0
-    print(f"\n🔄 OVER/UNDER PREDICTIONS")
-    print(f"  Accuracy:             {ou_accuracy:.2f}%")
-    print(f"  Correct:              {ou_correct_count}/{results_df['ou_correct'].notna().sum()}")
-else:
-    print(f"\n🔄 OVER/UNDER PREDICTIONS")
-    print(f"  Status:               Pending validation")
-
-if 'ou_pnl' in results_df.columns and results_df['ou_pnl'].notna().any():
-    ou_total_pnl = results_df['ou_pnl'].sum()
-    print(f"  Total PnL:            {ou_total_pnl:.2f}")
-    print(f"  Avg PnL/Bet:          {results_df['ou_pnl'].mean():.4f}")
-else:
-    print(f"  PnL:                  Pending validation")
+print(f"\n🔄 OVER/UNDER PREDICTIONS")
+print(f"  Status:               Pending validation")
 
 print(f"\n📈 OVERALL")
 print(f"  Total Games:          {len(results_df)}")
@@ -560,12 +522,6 @@ display_cols = ['home_team', 'away_team', 'home_points_predicted', 'away_points_
                 'total_points_predicted', 'ml_prediction', 'ml_probability', 'ml_confidence',
                 'grade', 'ou_grade', 'spread_grade', 'ou_predicted', 'home_spread', 'away_spread', 
                 'home_spread_covered_predicted', 'away_spread_covered_predicted', 'status']
-
-if 'ml_actual' in results_df.columns:
-    display_cols.extend(['ml_actual', 'ml_correct', 'ml_pnl'])
-
-if 'ou_actual' in results_df.columns:
-    display_cols.extend(['ou_actual', 'ou_correct', 'ou_pnl'])
 
 print(results_df[display_cols].head(10).to_string(index=False))
 print("-"*80)
