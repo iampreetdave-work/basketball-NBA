@@ -51,7 +51,9 @@ CSV_COLUMNS = [
     'spread_pnl',
     'ou_pnl',
     'spread_covered_predicted',
-    'spread_covered_actual'
+    'spread_covered_actual',
+    'home_spread_covered_predicted',
+    'away_spread_covered_predicted'
 ]
 
 COLUMN_MAPPING = {}
