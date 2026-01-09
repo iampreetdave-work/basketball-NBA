@@ -48,10 +48,8 @@ CSV_COLUMNS = [
     'away_spread_odds',
     'over_odds',
     'under_odds',
-    'spread_pnl',
-    'ou_pnl',
+    
     'spread_covered_predicted',
-    'spread_covered_actual',
     'home_spread_covered_predicted',
     'away_spread_covered_predicted'
 ]
