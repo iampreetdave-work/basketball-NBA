@@ -1,7 +1,8 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2026-01-13_UTAH@CLE,2026-01-13,2026-01-13T00:10:00Z,Cleveland Cavaliers,Utah Jazz,upcoming,draftkings,-12.5,12.5,1.87,1.95,250.5,1.91,1.91,1.13,6.25
-2026-01-13_BOS@IND,2026-01-13,2026-01-13T00:40:00Z,Indiana Pacers,Boston Celtics,upcoming,draftkings,5.5,-5.5,1.95,1.87,224.5,1.95,1.87,2.8,1.46
-2026-01-13_PHI@TOR,2026-01-13,2026-01-13T00:40:00Z,Toronto Raptors,Philadelphia 76ers,upcoming,draftkings,3.5,-3.5,1.85,1.98,221.5,2.0,1.83,2.24,1.68
-2026-01-13_BKN@DAL,2026-01-13,2026-01-13T01:40:00Z,Dallas Mavericks,Brooklyn Nets,upcoming,draftkings,-4.5,4.5,1.95,1.87,222.5,1.95,1.87,1.56,2.5
-2026-01-13_LAL@SAC,2026-01-13,2026-01-13T03:10:00Z,Sacramento Kings,Los Angeles Lakers,upcoming,draftkings,9.5,-9.5,1.87,1.95,226.5,1.85,1.98,4.1,1.25
-2026-01-13_CHA@LAC,2026-01-13,2026-01-13T03:40:00Z,Los Angeles Clippers,Charlotte Hornets,upcoming,draftkings,-4.5,4.5,1.91,1.91,223.5,1.91,1.91,1.54,2.54
+2026-01-14_PHX@MIA,2026-01-14,2026-01-14T00:40:00Z,Miami Heat,Phoenix Suns,upcoming,draftkings,-1.5,1.5,1.95,1.87,230.5,1.91,1.91,1.87,1.95
+2026-01-14_CHI@HOU,2026-01-14,2026-01-14T01:10:00Z,Houston Rockets,Chicago Bulls,upcoming,draftkings,-12.5,12.5,1.89,1.93,223.5,1.87,1.95,1.17,5.4
+2026-01-14_DEN@NO,2026-01-14,2026-01-14T01:10:00Z,New Orleans Pelicans,Denver Nuggets,upcoming,draftkings,2.5,-2.5,1.91,1.91,235.5,1.91,1.91,2.2,1.7
+2026-01-14_MIN@MIL,2026-01-14,2026-01-14T01:10:00Z,Milwaukee Bucks,Minnesota Timberwolves,upcoming,draftkings,-3.5,3.5,1.89,1.93,228.5,1.93,1.89,1.68,2.24
+2026-01-14_SA@OKC,2026-01-14,2026-01-14T01:10:00Z,Oklahoma City Thunder,San Antonio Spurs,upcoming,draftkings,-7.5,7.5,1.87,1.95,229.5,1.95,1.87,1.36,3.25
+2026-01-14_ATL@LAL,2026-01-14,2026-01-14T03:40:00Z,Los Angeles Lakers,Atlanta Hawks,upcoming,draftkings,3.5,-3.5,1.91,1.91,232.5,1.91,1.91,2.3,1.65
+2026-01-14_POR@GS,2026-01-14,2026-01-14T04:10:00Z,Golden State Warriors,Portland Trail Blazers,upcoming,draftkings,-10.5,10.5,1.95,1.87,223.5,1.91,1.91,1.23,4.4
