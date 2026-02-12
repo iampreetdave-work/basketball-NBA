@@ -32,6 +32,12 @@ jobs:
           
         run: python grading_model.py
       - name: gamekey
+        env:
+            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_PORT: ${{ secrets.DB_PORT }}
+            DB_DATABASE: ${{ secrets.DB_DATABASE }}
+            DB_USER: ${{ secrets.DB_USER }}
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: python game_key.py
       
       - name: Log success
