@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import psycopg2
-from psycopg2.extras import execute_values
 from datetime import datetime
 import os
 import sys
@@ -171,16 +170,34 @@ def prepare_data_for_db(df):
     result_df = result_df.where(pd.notna(result_df), None)
     result_df = result_df.replace([np.inf, -np.inf], None)
     
-    print(f"✓ Prepared {len(result_df)} records with all features")
+    # Remove duplicates from CSV based on game_identifier
+    print("\n[2.5/4] Checking for duplicates in CSV...")
+    initial_count = len(result_df)
+    
+    # Drop rows with missing game_identifier first
+    result_df = result_df[result_df['game_identifier'].notna()]
+    missing_id_count = initial_count - len(result_df)
+    if missing_id_count > 0:
+        print(f"⚠️  Removed {missing_id_count} row(s) with missing game_identifier")
+    
+    # Drop duplicate game_identifiers, keeping the first occurrence
+    result_df = result_df.drop_duplicates(subset=['game_identifier'], keep='first')
+    duplicates_removed = initial_count - missing_id_count - len(result_df)
+    
+    if duplicates_removed > 0:
+        print(f"⚠️  Removed {duplicates_removed} duplicate game_identifier(s) from CSV")
+    
+    print(f"✓ Prepared {len(result_df)} unique records with all features")
     return result_df
 
 # ============================================================================
-# INSERT DATA INTO DATABASE
+# INSERT DATA INTO DATABASE (ROW BY ROW)
 # ============================================================================
 def insert_data_to_db(df_clean):
-    """Insert or update data in database"""
+    """Insert data in database row by row, skip if already exists in DB"""
     
-    print("\n[3/4] Inserting into database...")
+    print("\n[3/4] Inserting into database (checking DB for each row)...")
+    print("Note: CSV duplicates already removed\n")
     
     conn = get_db_connection()
     cur = conn.cursor()
@@ -210,44 +227,76 @@ def insert_data_to_db(df_clean):
         'steals_diff', 'blocks_diff', 'defense_diff', 'line_bias'
     ]
     
+    inserted_count = 0
+    skipped_count = 0
+    error_count = 0
+    
     try:
-        # Convert dataframe to list of tuples
-        data_tuples = []
-        for _, row in df_clean.iterrows():
-            values = []
-            for col in db_columns:
-                val = row.get(col, None)
-                # Convert numpy types to Python types
-                if pd.notna(val):
-                    if isinstance(val, (np.integer, np.floating)):
-                        val = float(val) if isinstance(val, np.floating) else int(val)
-                    values.append(val)
-                else:
-                    values.append(None)
-            data_tuples.append(tuple(values))
+        for idx, row in df_clean.iterrows():
+            try:
+                game_id = row.get('game_identifier', None)
+                
+                if not game_id or pd.isna(game_id):
+                    print(f"⚠️  Row {idx + 1}: Skipping - no game_identifier")
+                    skipped_count += 1
+                    continue
+                
+                # Check if record already exists in database
+                cur.execute(
+                    'SELECT game_identifier FROM "historical_features_NBA" WHERE game_identifier = %s',
+                    (game_id,)
+                )
+                exists = cur.fetchone()
+                
+                if exists:
+                    # SKIP - record already exists
+                    skipped_count += 1
+                    print(f"⊘ Row {idx + 1}: Skipped (already exists) - {game_id}")
+                    continue
+                
+                # Prepare values for this row
+                values = []
+                for col in db_columns:
+                    val = row.get(col, None)
+                    # Convert numpy types to Python types
+                    if pd.notna(val):
+                        if isinstance(val, (np.integer, np.floating)):
+                            val = float(val) if isinstance(val, np.floating) else int(val)
+                        values.append(val)
+                    else:
+                        values.append(None)
+                
+                # INSERT new record
+                columns_str = ', '.join([f'"{col}"' for col in db_columns])
+                placeholders = ', '.join(['%s'] * len(db_columns))
+                
+                query = f"""
+                    INSERT INTO "historical_features_NBA" ({columns_str})
+                    VALUES ({placeholders})
+                """
+                
+                cur.execute(query, values)
+                conn.commit()
+                inserted_count += 1
+                print(f"✓ Row {idx + 1}: Inserted - {game_id}")
+                    
+            except Exception as row_error:
+                conn.rollback()
+                error_count += 1
+                print(f"❌ Row {idx + 1}: Error - {str(row_error)}")
+                continue
         
-        # UPSERT: INSERT ... ON CONFLICT DO UPDATE
-        columns_str = ', '.join(db_columns)
-        placeholders = ', '.join(['%s'] * len(db_columns))
+        print(f"\n{'='*60}")
+        print(f"✓ Processing complete:")
+        print(f"  - Inserted: {inserted_count}")
+        print(f"  - Skipped: {skipped_count}")
+        print(f"  - Errors: {error_count}")
+        print(f"{'='*60}")
         
-        update_str = ', '.join([f"{col} = EXCLUDED.{col}" for col in db_columns if col != 'game_identifier'])
-        
-        query = f"""
-            INSERT INTO "historical_features_NBA" ({columns_str})
-            VALUES %s
-            ON CONFLICT (game_identifier) DO UPDATE SET
-            {update_str}
-        """
-        
-        execute_values(cur, query, data_tuples, page_size=100)
-        conn.commit()
-        
-        print(f"✓ Successfully inserted/updated {len(data_tuples)} records into historical_features_NBA")
-        return len(data_tuples)
+        return inserted_count
         
     except Exception as e:
-        conn.rollback()
-        print(f"❌ Error inserting data: {e}")
+        print(f"❌ Fatal error: {e}")
         raise
     finally:
         cur.close()
@@ -258,7 +307,7 @@ def insert_data_to_db(df_clean):
 # ============================================================================
 def main():
     print("="*80)
-    print("STORING HISTORICAL FEATURES TO DATABASE")
+    print("STORING HISTORICAL FEATURES TO DATABASE (INSERT ONLY)")
     print("="*80)
     print(f"\nTimestamp: {datetime.now().isoformat()}")
     print(f"Database: {DB_NAME} @ {DB_HOST}")
@@ -278,13 +327,13 @@ def main():
         print("✓ Database connection successful")
         
         # Insert data
-        rows_inserted = insert_data_to_db(df_clean)
+        rows_processed = insert_data_to_db(df_clean)
         
         print("\n[4/4] Finalizing...")
         print("\n" + "="*80)
         print("✅ COMPLETE - Historical features stored successfully")
         print("="*80)
-        print(f"Records stored: {rows_inserted}")
+        print(f"Records processed: {rows_processed}")
         print(f"Table: historical_features_NBA")
         print(f"Timestamp: {datetime.now().isoformat()}\n")
         
