@@ -12,7 +12,7 @@ DB_CONFIG = {
     'password': os.environ.get('DB_PASSWORD')
 }
 
-TABLE_NAME = 'agility_nba_b1'
+TABLE_NAME = 'predictions_nba_b1_ourmodel'
 CSV_FILE = 'NBA_PREDICTIONS_ML.csv'
 
 # All columns from generated CSV (excluding id)
