@@ -30,7 +30,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           CSV_FILE: NBA_PREDICTIONS_ML.csv
-        run: python save.py
+        run: python new_save.py
 
       - name: save features
         env:
