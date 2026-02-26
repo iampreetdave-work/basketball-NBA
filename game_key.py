@@ -11,7 +11,7 @@ DB_CONFIG = {
     'user': os.environ.get('DB_USER'),
     'password': os.environ.get('DB_PASSWORD')
 }
-TABLE_NAME = 'agility_nba_b1'
+TABLE_NAME = 'predictions_nba_b1_ourmodel'
 
 # Team name to abbreviation mapping
 TEAM_ALIASES = {
