@@ -55,32 +55,8 @@ CSV_COLUMNS = [
 
 COLUMN_MAPPING = {}
 
-
-def ensure_unique_constraint(cursor):
-    """Add UNIQUE constraint on game_identifier if it doesn't already exist."""
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM information_schema.table_constraints tc
-        JOIN information_schema.constraint_column_usage ccu
-            ON tc.constraint_name = ccu.constraint_name
-        WHERE tc.table_name = %s
-            AND ccu.column_name = 'game_identifier'
-            AND tc.constraint_type IN ('UNIQUE', 'PRIMARY KEY')
-    """, (TABLE_NAME,))
-
-    if cursor.fetchone()[0] == 0:
-        print("⚠ No UNIQUE constraint found on game_identifier — adding it now...")
-        cursor.execute(f"""
-            ALTER TABLE {TABLE_NAME}
-            ADD CONSTRAINT uq_{TABLE_NAME}_game_identifier UNIQUE (game_identifier)
-        """)
-        print("✓ UNIQUE constraint added on game_identifier")
-    else:
-        print("✓ UNIQUE constraint already exists on game_identifier")
-
-
 def push_data():
-    """Read CSV and upsert all columns to database (insert new, update existing)"""
+    """Read CSV and push to database — insert new rows, update existing ones by game_identifier"""
     try:
         # Validate credentials are loaded
         if not all(DB_CONFIG.values()):
@@ -98,31 +74,21 @@ def push_data():
         # Connect to database
         print("Connecting to PostgreSQL...")
         connection = psycopg2.connect(**DB_CONFIG)
-        connection.autocommit = False
         print("✓ Connected to database")
 
-        with connection.cursor() as cursor:
-            # Step 1: Ensure UNIQUE constraint exists
-            ensure_unique_constraint(cursor)
-            connection.commit()
-
-        # Step 2: Build the UPSERT query
+        # Build queries once
         db_columns = [COLUMN_MAPPING.get(col, col) for col in CSV_COLUMNS]
+
+        # UPDATE query: SET all columns except game_identifier, WHERE game_identifier = %s
+        update_columns = [c for c in db_columns if c != 'game_identifier']
+        update_set = ', '.join(f"{col} = %s" for col in update_columns)
+        update_query = f"UPDATE {TABLE_NAME} SET {update_set} WHERE game_identifier = %s"
+
+        # INSERT query
         columns_str = ', '.join(db_columns)
         placeholders = ', '.join(['%s'] * len(CSV_COLUMNS))
+        insert_query = f"INSERT INTO {TABLE_NAME} ({columns_str}) VALUES ({placeholders})"
 
-        # Columns to update on conflict (everything except game_identifier)
-        update_columns = [c for c in db_columns if c != 'game_identifier']
-        update_set = ', '.join(f"{col} = EXCLUDED.{col}" for col in update_columns)
-
-        upsert_query = f"""
-        INSERT INTO {TABLE_NAME} ({columns_str})
-        VALUES ({placeholders})
-        ON CONFLICT (game_identifier)
-        DO UPDATE SET {update_set}
-        """
-
-        # Step 3: Insert/update data
         inserted_count = 0
         updated_count = 0
 
@@ -130,25 +96,31 @@ def push_data():
             for index, row in df.iterrows():
                 game_id = row['game_identifier']
 
-                # Check if exists (for logging only)
+                # Handle NaN values as None
+                values = {
+                    col: None if pd.isna(row[col]) else row[col]
+                    for col in CSV_COLUMNS
+                }
+
+                # Check if game_identifier exists
                 cursor.execute(
                     f"SELECT COUNT(*) FROM {TABLE_NAME} WHERE game_identifier = %s",
                     (game_id,)
                 )
                 exists = cursor.fetchone()[0] > 0
 
-                # Handle NaN values as None for NULL insertion
-                values = tuple(
-                    None if pd.isna(row[col]) else row[col]
-                    for col in CSV_COLUMNS
-                )
-
-                cursor.execute(upsert_query, values)
-
                 if exists:
+                    # UPDATE: values for SET columns + game_identifier for WHERE clause
+                    update_values = tuple(
+                        values[col] for col in CSV_COLUMNS if col != 'game_identifier'
+                    ) + (game_id,)
+                    cursor.execute(update_query, update_values)
                     print(f"  ↻ Updated: {game_id}")
                     updated_count += 1
                 else:
+                    # INSERT: all columns
+                    insert_values = tuple(values[col] for col in CSV_COLUMNS)
+                    cursor.execute(insert_query, insert_values)
                     print(f"  ✓ Inserted: {game_id}")
                     inserted_count += 1
 
