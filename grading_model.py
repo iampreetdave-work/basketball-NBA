@@ -30,7 +30,7 @@ try:
     fetch_query = """
         SELECT 
             game_identifier, ml_confidence, spread_covered_predicted
-        FROM agility_nba_b1
+        FROM predictions_nba_b1_ourmodel
         WHERE grade IS NULL 
            OR ou_grade IS NULL 
            OR spread_grade IS NULL
@@ -152,7 +152,7 @@ try:
     for idx, row in grades_df.iterrows():
         try:
             update_query = """
-                UPDATE agility_nba_b1
+                UPDATE predictions_nba_b1_ourmodel
                 SET 
                     grade = %s,
                     ou_grade = %s,
