@@ -55,6 +55,30 @@ CSV_COLUMNS = [
 
 COLUMN_MAPPING = {}
 
+
+def ensure_unique_constraint(cursor):
+    """Add UNIQUE constraint on game_identifier if it doesn't already exist."""
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.constraint_column_usage ccu
+            ON tc.constraint_name = ccu.constraint_name
+        WHERE tc.table_name = %s
+            AND ccu.column_name = 'game_identifier'
+            AND tc.constraint_type IN ('UNIQUE', 'PRIMARY KEY')
+    """, (TABLE_NAME,))
+
+    if cursor.fetchone()[0] == 0:
+        print("⚠ No UNIQUE constraint found on game_identifier — adding it now...")
+        cursor.execute(f"""
+            ALTER TABLE {TABLE_NAME}
+            ADD CONSTRAINT uq_{TABLE_NAME}_game_identifier UNIQUE (game_identifier)
+        """)
+        print("✓ UNIQUE constraint added on game_identifier")
+    else:
+        print("✓ UNIQUE constraint already exists on game_identifier")
+
+
 def push_data():
     """Read CSV and upsert all columns to database (insert new, update existing)"""
     try:
@@ -74,18 +98,22 @@ def push_data():
         # Connect to database
         print("Connecting to PostgreSQL...")
         connection = psycopg2.connect(**DB_CONFIG)
+        connection.autocommit = False
         print("✓ Connected to database")
 
-        # Build the UPSERT query once
+        with connection.cursor() as cursor:
+            # Step 1: Ensure UNIQUE constraint exists
+            ensure_unique_constraint(cursor)
+            connection.commit()
+
+        # Step 2: Build the UPSERT query
         db_columns = [COLUMN_MAPPING.get(col, col) for col in CSV_COLUMNS]
         columns_str = ', '.join(db_columns)
         placeholders = ', '.join(['%s'] * len(CSV_COLUMNS))
 
         # Columns to update on conflict (everything except game_identifier)
         update_columns = [c for c in db_columns if c != 'game_identifier']
-        update_set = ', '.join(
-            f"{col} = EXCLUDED.{col}" for col in update_columns
-        )
+        update_set = ', '.join(f"{col} = EXCLUDED.{col}" for col in update_columns)
 
         upsert_query = f"""
         INSERT INTO {TABLE_NAME} ({columns_str})
@@ -94,7 +122,7 @@ def push_data():
         DO UPDATE SET {update_set}
         """
 
-        # Insert/update data
+        # Step 3: Insert/update data
         inserted_count = 0
         updated_count = 0
 
@@ -102,7 +130,7 @@ def push_data():
             for index, row in df.iterrows():
                 game_id = row['game_identifier']
 
-                # Check if it already exists (for logging purposes only)
+                # Check if exists (for logging only)
                 cursor.execute(
                     f"SELECT COUNT(*) FROM {TABLE_NAME} WHERE game_identifier = %s",
                     (game_id,)
@@ -121,6 +149,7 @@ def push_data():
                     print(f"  ↻ Updated: {game_id}")
                     updated_count += 1
                 else:
+                    print(f"  ✓ Inserted: {game_id}")
                     inserted_count += 1
 
         connection.commit()
@@ -145,6 +174,8 @@ def push_data():
         raise
     except psycopg2.Error as e:
         print(f"✗ Database error: {e}")
+        if 'connection' in locals():
+            connection.rollback()
         raise
     except Exception as e:
         print(f"✗ Fatal error: {e}")
