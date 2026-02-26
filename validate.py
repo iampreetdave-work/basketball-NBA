@@ -16,15 +16,14 @@ DB_PORT = os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_DATABASE')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
-TABLE_NAME = 'agility_nba_b1'
-HISTORICAL_TABLE = 'historical_features_NBA'
+TABLE_NAME = 'predictions_nba_b1_ourmodel'
+HISTORICAL_TABLE = 'model_training_nba'
 
 # ============================================================================
 # API CONFIGURATION (Same as PreMatchFeatureEngine)
 # ============================================================================
 API_KEYS = [
-    "iZbsR0ZfpoBlMujY0zBMyj56tgr4hlviWq9DIqcd",
-    "1I6HqMjIPYydS2Sn7gUzsJGflVWQrANy4fGsJNjz"
+    "cYfdglHWnlwxQXIIPo3CoYplPEUXYHvbt6Yu9IdB"
 ]
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
@@ -403,8 +402,8 @@ def determine_status(home_points_actual, away_points_actual):
 def validate_with_actual_data():
     """
     Main workflow:
-    1. Query agility_nba_b1 table for PENDING status records
-    2. Query historical_features_NBA to get match_ids
+    1. Query predictions_nba_b1_ourmodel table for PENDING status records
+    2. Query model_training_nba to get match_ids
     3. Fetch actual game data from Sportradar
     4. Calculate ml_actual, ml_correct, ml_pnl, ou_correct, spread_covered_actual, spread_pnl, ou_pnl
     5. Update status based on whether actual data exists
@@ -416,7 +415,7 @@ def validate_with_actual_data():
     print("="*100)
     
     # ========================================================================
-    # STEP 1: FETCH PENDING RECORDS FROM agility_nba_b1
+    # STEP 1: FETCH PENDING RECORDS FROM predictions_nba_b1_ourmodel
     # ========================================================================
     print("\n[STEP 1] Fetching PENDING records from database...")
     
@@ -449,9 +448,9 @@ def validate_with_actual_data():
         return
     
     # ========================================================================
-    # STEP 2: FETCH MATCH_IDS FROM historical_features_NBA
+    # STEP 2: FETCH MATCH_IDS FROM model_training_nba
     # ========================================================================
-    print("\n[STEP 2] Fetching match_ids from historical_features_NBA...")
+    print("\n[STEP 2] Fetching match_ids from model_training_nba...")
     
     try:
         # Query for match_ids
