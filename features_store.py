@@ -243,7 +243,7 @@ def insert_data_to_db(df_clean):
                 
                 # Check if record already exists in database
                 cur.execute(
-                    'SELECT game_identifier FROM "historical_features_NBA" WHERE game_identifier = %s',
+                    'SELECT game_identifier FROM "model_training_nba" WHERE game_identifier = %s',
                     (game_id,)
                 )
                 exists = cur.fetchone()
@@ -271,7 +271,7 @@ def insert_data_to_db(df_clean):
                 placeholders = ', '.join(['%s'] * len(db_columns))
                 
                 query = f"""
-                    INSERT INTO "historical_features_NBA" ({columns_str})
+                    INSERT INTO "model_training_nba" ({columns_str})
                     VALUES ({placeholders})
                 """
                 
@@ -334,7 +334,7 @@ def main():
         print("✅ COMPLETE - Historical features stored successfully")
         print("="*80)
         print(f"Records processed: {rows_processed}")
-        print(f"Table: historical_features_NBA")
+        print(f"Table: model_training_nba")
         print(f"Timestamp: {datetime.now().isoformat()}\n")
         
     except Exception as e:
