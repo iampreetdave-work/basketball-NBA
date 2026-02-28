@@ -1,6 +1,6 @@
-game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
-2026-02-28_CLE@DET,2026-02-28,2026-02-28T00:10:00Z,Detroit Pistons,Cleveland Cavaliers,upcoming,draftkings,-6.5,6.5,1.93,1.89,225.5,1.91,1.91,3.1,1.39
-2026-02-28_BKN@BOS,2026-02-28,2026-02-28T00:40:00Z,Boston Celtics,Brooklyn Nets,upcoming,draftkings,-17.5,17.5,1.91,1.91,208.5,1.91,1.91,9.5,1.07
-2026-02-28_NY@MIL,2026-02-28,2026-02-28T01:10:00Z,Milwaukee Bucks,New York Knicks,upcoming,draftkings,7.5,-7.5,1.93,1.89,222.5,1.95,1.87,1.33,3.45
-2026-02-28_MEM@DAL,2026-02-28,2026-02-28T01:40:00Z,Dallas Mavericks,Memphis Grizzlies,upcoming,draftkings,-5.5,5.5,1.91,1.91,237.5,1.93,1.89,2.85,1.44
-2026-02-28_DEN@OKC,2026-02-28,2026-02-28T02:40:00Z,Oklahoma City Thunder,Denver Nuggets,upcoming,draftkings,-8.5,8.5,1.98,1.85,231.5,1.89,1.93,3.6,1.31
+game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
+2026-02-28_POR@CHA,2026-02-28,2026-02-28T18:10:00Z,Charlotte Hornets,Portland Trail Blazers,upcoming,draftkings,-7.5,7.5,1.89,1.93,229.5,1.91,1.91,1.32,3.5
+2026-02-28_HOU@MIA,2026-02-28,2026-02-28T20:10:00Z,Miami Heat,Houston Rockets,upcoming,draftkings,3.5,-3.5,1.89,1.93,225.5,1.91,1.91,2.4,1.6
+2026-03-01_TOR@WSH,2026-03-01,2026-03-01T00:10:00Z,Washington Wizards,Toronto Raptors,upcoming,draftkings,14.5,-14.5,1.85,1.98,226.5,1.89,1.93,7.0,1.11
+2026-03-01_LAL@GS,2026-03-01,2026-03-01T01:40:00Z,Golden State Warriors,Los Angeles Lakers,upcoming,draftkings,4.5,-4.5,1.87,1.95,228.5,1.95,1.87,2.5,1.56
+2026-03-01_NO@UTAH,2026-03-01,2026-03-01T02:40:00Z,Utah Jazz,New Orleans Pelicans,upcoming,draftkings,6.5,-6.5,1.89,1.93,243.5,1.91,1.91,3.0,1.41
