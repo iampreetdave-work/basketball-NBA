@@ -1,8 +1,7 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2026-03-07_DAL@BOS,2026-03-07,2026-03-07T00:10:00Z,Boston Celtics,Dallas Mavericks,upcoming,draftkings,-15.5,15.5,1.93,1.89,222.5,1.93,1.89,1.1,7.5
-2026-03-07_MIA@CHA,2026-03-07,2026-03-07T00:10:00Z,Charlotte Hornets,Miami Heat,upcoming,draftkings,-7.5,7.5,1.95,1.87,229.5,1.93,1.89,1.35,3.3
-2026-03-07_POR@HOU,2026-03-07,2026-03-07T01:10:00Z,Houston Rockets,Portland Trail Blazers,upcoming,draftkings,-6.5,6.5,1.93,1.89,220.5,1.87,1.95,1.42,2.95
-2026-03-07_NY@DEN,2026-03-07,2026-03-07T02:10:00Z,Denver Nuggets,New York Knicks,upcoming,draftkings,1.5,-1.5,1.89,1.93,229.5,1.91,1.91,2.0,1.83
-2026-03-07_NO@PHX,2026-03-07,2026-03-07T02:10:00Z,Phoenix Suns,New Orleans Pelicans,upcoming,draftkings,-5.5,5.5,1.85,1.98,224.5,1.91,1.91,1.43,2.9
-2026-03-07_LAC@SA,2026-03-07,2026-03-07T02:40:00Z,San Antonio Spurs,Los Angeles Clippers,upcoming,draftkings,-7.5,7.5,1.91,1.91,224.5,1.91,1.91,1.32,3.5
-2026-03-07_IND@LAL,2026-03-07,2026-03-07T03:40:00Z,Los Angeles Lakers,Indiana Pacers,upcoming,fanduel,-10.5,10.5,1.91,1.91,234.5,1.88,1.94,1.22,4.5
+2026-03-07_ORL@MIN,2026-03-07,2026-03-07T20:10:00Z,Minnesota Timberwolves,Orlando Magic,upcoming,draftkings,-5.5,5.5,1.85,1.98,226.5,1.95,1.87,1.41,3.0
+2026-03-07_PHI@ATL,2026-03-07,2026-03-07T23:10:00Z,Atlanta Hawks,Philadelphia 76ers,upcoming,draftkings,-6.5,6.5,1.93,1.89,233.5,1.91,1.91,1.4,3.05
+2026-03-07_BKN@DET,2026-03-07,2026-03-07T23:10:00Z,Detroit Pistons,Brooklyn Nets,upcoming,draftkings,-14.5,14.5,1.98,1.85,216.5,1.95,1.87,1.11,7.0
+2026-03-08_LAC@MEM,2026-03-08,2026-03-08T01:10:00Z,Memphis Grizzlies,Los Angeles Clippers,upcoming,draftkings,6.5,-6.5,1.87,1.95,227.5,1.95,1.87,3.2,1.37
+2026-03-08_UTAH@MIL,2026-03-08,2026-03-08T01:10:00Z,Milwaukee Bucks,Utah Jazz,upcoming,draftkings,-10.5,10.5,1.87,1.95,234.5,1.87,1.95,1.19,5.0
+2026-03-08_GS@OKC,2026-03-08,2026-03-08T01:40:00Z,Oklahoma City Thunder,Golden State Warriors,upcoming,draftkings,-14.5,14.5,1.89,1.93,219.5,1.93,1.89,1.12,6.5
