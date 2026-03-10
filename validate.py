@@ -22,9 +22,7 @@ HISTORICAL_TABLE = 'model_training_nba'
 # ============================================================================
 # API CONFIGURATION (Same as PreMatchFeatureEngine)
 # ============================================================================
-API_KEYS = [
-    "cYfdglHWnlwxQXIIPo3CoYplPEUXYHvbt6Yu9IdB"
-]
+API_KEYS = ["89Jgzt0uLUkhY8daLsSyCdEwn8L3WA9Ka8tQNnLd"]
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
 VERSION = "v8"
