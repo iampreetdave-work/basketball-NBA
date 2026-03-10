@@ -37,7 +37,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           ls -la  # Debug: show files in root
-          python validate.py
+          python new_validate.py
           ls -la  # Debug: show files after running script
       
       - name: Commit and push results
