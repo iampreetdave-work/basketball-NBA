@@ -1,7 +1,7 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
-2026-03-11_CLE@ORL,2026-03-11,2026-03-11T23:40:00Z,Orlando Magic,Cleveland Cavaliers,upcoming,draftkings,3.5,-3.5,1.89,1.93,226.5,1.95,1.87,1.65,2.3
-2026-03-12_TOR@NO,2026-03-12,2026-03-12T00:10:00Z,New Orleans Pelicans,Toronto Raptors,upcoming,draftkings,1.5,-1.5,1.91,1.91,232.5,1.89,1.93,1.83,2.0
-2026-03-12_NY@UTAH,2026-03-12,2026-03-12T01:10:00Z,Utah Jazz,New York Knicks,upcoming,draftkings,12.5,-12.5,1.91,1.91,229.5,1.89,1.93,1.14,6.0
+2026-03-11_CLE@ORL,2026-03-11,2026-03-11T23:40:00Z,Orlando Magic,Cleveland Cavaliers,upcoming,draftkings,3.5,-3.5,1.91,1.91,226.5,1.95,1.87,1.62,2.36
+2026-03-12_TOR@NO,2026-03-12,2026-03-12T00:10:00Z,New Orleans Pelicans,Toronto Raptors,upcoming,draftkings,1.5,-1.5,1.95,1.87,232.5,1.89,1.93,1.8,2.05
+2026-03-12_NY@UTAH,2026-03-12,2026-03-12T01:10:00Z,Utah Jazz,New York Knicks,upcoming,draftkings,12.5,-12.5,1.91,1.91,229.5,1.89,1.93,1.13,6.25
 2026-03-12_CHA@SAC,2026-03-12,2026-03-12T02:10:00Z,Sacramento Kings,Charlotte Hornets,upcoming,draftkings,12.5,-12.5,1.91,1.91,226.5,1.91,1.91,1.14,6.0
-2026-03-12_HOU@DEN,2026-03-12,2026-03-12T02:10:00Z,Denver Nuggets,Houston Rockets,upcoming,draftkings,-5.5,5.5,1.95,1.87,228.5,1.89,1.93,2.8,1.46
-2026-03-12_MIN@LAC,2026-03-12,2026-03-12T02:40:00Z,Los Angeles Clippers,Minnesota Timberwolves,upcoming,draftkings,-1.5,1.5,1.87,1.95,226.5,1.91,1.91,2.05,1.8
+2026-03-12_HOU@DEN,2026-03-12,2026-03-12T02:10:00Z,Denver Nuggets,Houston Rockets,upcoming,draftkings,-5.5,5.5,1.91,1.91,230.5,1.87,1.95,2.8,1.46
+2026-03-12_MIN@LAC,2026-03-12,2026-03-12T02:40:00Z,Los Angeles Clippers,Minnesota Timberwolves,upcoming,draftkings,-2.5,2.5,1.91,1.91,225.5,1.87,1.95,2.14,1.74
