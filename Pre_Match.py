@@ -55,7 +55,7 @@ TEAM_ALIASES = {
 }
 
 # API Configuration
-API_KEYS = ["rMiNQjaqHSgEYXw0INxjOpyjnA4Q8vqHygmkApw7"]
+API_KEYS = ["HiTL1KYsliR5zo04BY8qiflnEgmRkOUXTGPwzO1c"]
 BASE_URL = "https://api.sportradar.us/nba"
 ACCESS_LEVEL = "trial"
 VERSION = "v8"
