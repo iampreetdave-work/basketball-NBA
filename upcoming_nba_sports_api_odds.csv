@@ -1,0 +1,7 @@
+game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
+2026-03-20_NY@BKN,2026-03-20,2026-03-20T23:30:00+00:00,Brooklyn Nets,New York Knicks,upcoming,pinnacle,18.0,18.0,1.93,1.95,216.5,1.92,1.92,1.05,12.67
+2026-03-20_GS@DET,2026-03-20,2026-03-20T23:30:00+00:00,Detroit Pistons,Golden State Warriors,upcoming,pinnacle,-6.0,-6.5,1.89,1.91,217.0,1.89,1.94,3.16,1.39
+2026-03-21_ATL@HOU,2026-03-21,2026-03-21T00:00:00+00:00,Houston Rockets,Atlanta Hawks,upcoming,pinnacle,-3.5,-4.0,1.88,1.91,227.5,1.92,1.92,2.44,1.61
+2026-03-21_BOS@MEM,2026-03-21,2026-03-21T00:00:00+00:00,Memphis Grizzlies,Boston Celtics,upcoming,pinnacle,15.5,15.0,1.87,1.92,228.5,1.93,1.92,1.09,8.41
+2026-03-21_POR@MIN,2026-03-21,2026-03-21T00:00:00+00:00,Minnesota Timberwolves,Portland Trail Blazers,upcoming,pinnacle,-2.5,-3.0,1.87,1.92,229.5,1.91,1.94,2.26,1.7
+2026-03-21_TOR@DEN,2026-03-21,2026-03-21T01:00:00+00:00,Denver Nuggets,Toronto Raptors,upcoming,pinnacle,-6.5,-7.0,1.89,1.9,235.0,1.92,1.91,3.26,1.38
