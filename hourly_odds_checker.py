@@ -11,6 +11,7 @@ Otherwise:
 
 import requests
 import pandas as pd
+import json
 import os
 import sys
 from datetime import datetime, timezone
@@ -19,7 +20,14 @@ from datetime import datetime, timezone
 # THE ODDS API CONFIGURATION (same as Odds_Pre_Match.py)
 # ============================================================================
 
-API_KEYS = ["2654835dd9c6779ec43efbe938a8ebe3"]
+API_KEYS = [
+    "2654835dd9c6779ec43efbe938a8ebe3",
+    "83dcdaff13977e39bc65141046c993f3",
+    "02a80c14ece71bed354b63915e3fb8b3",
+    "30d78032b75c0922de70de22f0337b91",
+    "8972d0f8f1c909b2791607ed1a29d6a5",
+    "7483e0df3726e14cdb152f580291f47d"
+]
 BASE_URL = "https://api.the-odds-api.com/v4"
 SPORT = "basketball_nba"
 
@@ -179,6 +187,20 @@ def main():
 
     print(f"  Already predicted: {len(already_predicted)}")
     print(f"  NEW (need predictions): {len(new_games)}")
+
+    # Build summary for Slack
+    summary = {
+        "timestamp": utc_now.strftime("%Y-%m-%d %H:%M UTC"),
+        "total_with_odds": len(odds_game_ids),
+        "already_predicted": len(already_predicted),
+        "new_games_count": len(new_games),
+        "new_games": sorted(new_games),
+        "all_games": sorted(odds_game_ids),
+    }
+
+    # Write summary JSON for workflow to read
+    with open("checker_summary.json", "w") as f:
+        json.dump(summary, f)
 
     if new_games:
         print(f"\n  New games found:")
