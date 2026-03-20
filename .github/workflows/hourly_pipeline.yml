@@ -85,7 +85,7 @@ jobs:
               },
               {
                 "type": "context",
-                "elements": [{"type": "mrkdwn", "text": "Pipeline skipped. Next check in 1 hour."}]
+                "elements": [{"type": "mrkdwn", "text": "Pipeline skipped. Next check in 30mins."}]
               }
             ]
           }
@@ -105,7 +105,7 @@ jobs:
             "blocks": [
               {
                 "type": "header",
-                "text": {"type": "plain_text", "text": "NBA Hourly Check - New Odds Detected!"}
+                "text": {"type": "plain_text", "text": "NBA odds Check - New Odds Detected!"}
               },
               {
                 "type": "section",
