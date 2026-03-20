@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 # THE ODDS API CONFIGURATION (same as Odds_Pre_Match.py)
 # ============================================================================
 
-API_KEYS = "2654835dd9c6779ec43efbe938a8ebe3"
+API_KEYS = ["2654835dd9c6779ec43efbe938a8ebe3"]
 BASE_URL = "https://api.the-odds-api.com/v4"
 SPORT = "basketball_nba"
 
