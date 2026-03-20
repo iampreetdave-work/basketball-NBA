@@ -2,7 +2,7 @@ name: NBA Hourly Odds Monitor & Pipeline
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour at :00
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
@@ -31,102 +31,162 @@ jobs:
       - name: Check for new odds
         id: odds_check
         run: |
-          echo "Checking The Odds API for new odds..."
           python hourly_odds_checker.py | tee checker_output.txt
 
-          # Check if new odds were found
           if grep -q "NEW_ODDS_FOUND" checker_output.txt; then
             echo "new_odds=true" >> $GITHUB_OUTPUT
-            echo "New odds detected — triggering full pipeline"
+
+            # Extract new games list for Slack
+            NEW_GAMES=$(python3 -c "
+          import json
+          d = json.load(open('checker_summary.json'))
+          print('\n'.join(d['new_games']))
+          ")
+            echo "new_games<<EOF" >> $GITHUB_OUTPUT
+            echo "$NEW_GAMES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+            NEW_COUNT=$(python3 -c "import json; print(json.load(open('checker_summary.json'))['new_games_count'])")
+            echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
+
+            TOTAL=$(python3 -c "import json; print(json.load(open('checker_summary.json'))['total_with_odds'])")
+            echo "total_with_odds=$TOTAL" >> $GITHUB_OUTPUT
           else
             echo "new_odds=false" >> $GITHUB_OUTPUT
-            echo "No new odds — skipping pipeline"
+
+            TOTAL=$(python3 -c "import json; print(json.load(open('checker_summary.json'))['total_with_odds'])" 2>/dev/null || echo "0")
+            echo "total_with_odds=$TOTAL" >> $GITHUB_OUTPUT
+
+            ALREADY=$(python3 -c "import json; print(json.load(open('checker_summary.json'))['already_predicted'])" 2>/dev/null || echo "0")
+            echo "already_predicted=$ALREADY" >> $GITHUB_OUTPUT
           fi
+
+      # ===== SLACK: No new odds =====
+      - name: Slack - No new odds
+        if: steps.odds_check.outputs.new_odds == 'false'
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "$(cat <<SLACK
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {"type": "plain_text", "text": "NBA Hourly Check - No New Odds"}
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {"type": "mrkdwn", "text": "*Status:* No new odds found"},
+                  {"type": "mrkdwn", "text": "*Time:* $(date -u +'%Y-%m-%d %H:%M UTC')"},
+                  {"type": "mrkdwn", "text": "*Games with odds:* ${{ steps.odds_check.outputs.total_with_odds }}"},
+                  {"type": "mrkdwn", "text": "*Already predicted:* ${{ steps.odds_check.outputs.already_predicted }}"}
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [{"type": "mrkdwn", "text": "Pipeline skipped. Next check in 1 hour."}]
+              }
+            ]
+          }
+          SLACK
+          )"
+
+      # ===== SLACK: New odds found - pipeline starting =====
+      - name: Slack - New odds found
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          GAMES_FORMATTED=$(echo "${{ steps.odds_check.outputs.new_games }}" | sed 's/^/• /' | tr '\n' '\\' | sed 's/\\/\\n/g')
+
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "$(cat <<SLACK
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {"type": "plain_text", "text": "NBA Hourly Check - New Odds Detected!"}
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {"type": "mrkdwn", "text": "*New games:* ${{ steps.odds_check.outputs.new_count }}"},
+                  {"type": "mrkdwn", "text": "*Time:* $(date -u +'%Y-%m-%d %H:%M UTC')"}
+                ]
+              },
+              {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": "*Games:*\n${GAMES_FORMATTED}"}
+              },
+              {
+                "type": "context",
+                "elements": [{"type": "mrkdwn", "text": "Running full pipeline: Features -> Odds -> Combine -> Predict -> Save -> Grade"}]
+              }
+            ]
+          }
+          SLACK
+          )"
 
       # ===== STEP 2: FULL PIPELINE (only if new odds found) =====
       - name: Step 2a - Fetch pre-match features
         if: steps.odds_check.outputs.new_odds == 'true'
-        run: |
-          echo "Fetching NBA pre-match features..."
-          python Pre_Match.py
+        run: python Pre_Match.py
         continue-on-error: false
 
       - name: Verify nba_prematch_features.csv
         if: steps.odds_check.outputs.new_odds == 'true'
         run: |
-          if [ -f "nba_prematch_features.csv" ]; then
-            echo "  Generated successfully — $(wc -l < nba_prematch_features.csv) lines"
-          else
-            echo "  ERROR: nba_prematch_features.csv not found!"
+          if [ ! -f "nba_prematch_features.csv" ]; then
+            echo "ERROR: nba_prematch_features.csv not found!"
             exit 1
           fi
 
       - name: Step 2b - Fetch odds
         if: steps.odds_check.outputs.new_odds == 'true'
-        run: |
-          echo "Fetching DraftKings/FanDuel odds..."
-          python Odds_Pre_Match.py
+        run: python Odds_Pre_Match.py
         continue-on-error: false
 
       - name: Verify upcoming_nba_draftkings_odds.csv
         if: steps.odds_check.outputs.new_odds == 'true'
         run: |
-          if [ -f "upcoming_nba_draftkings_odds.csv" ]; then
-            echo "  Generated successfully — $(wc -l < upcoming_nba_draftkings_odds.csv) lines"
-          else
-            echo "  ERROR: upcoming_nba_draftkings_odds.csv not found!"
+          if [ ! -f "upcoming_nba_draftkings_odds.csv" ]; then
+            echo "ERROR: upcoming_nba_draftkings_odds.csv not found!"
             exit 1
           fi
 
       - name: Step 2c - Combine features and odds
         if: steps.odds_check.outputs.new_odds == 'true'
-        run: |
-          echo "Combining into Future.csv..."
-          python Combine.py
+        run: python Combine.py
         continue-on-error: false
 
       - name: Verify Future.csv
         if: steps.odds_check.outputs.new_odds == 'true'
         run: |
-          if [ -f "Future.csv" ]; then
-            echo "  Generated successfully — $(wc -l < Future.csv) lines"
-          else
-            echo "  ERROR: Future.csv not found!"
+          if [ ! -f "Future.csv" ]; then
+            echo "ERROR: Future.csv not found!"
             exit 1
           fi
 
       - name: Verify trained models exist
         if: steps.odds_check.outputs.new_odds == 'true'
         run: |
-          required_files=("hybrid_home_xgb.pkl" "hybrid_away_xgb.pkl" "hybrid_scaler.pkl")
-          missing=0
-          for file in "${required_files[@]}"; do
-            if [ -f "model/$file" ]; then
-              echo "  $file OK"
-            else
-              echo "  $file MISSING"
-              missing=$((missing+1))
+          for file in hybrid_home_xgb.pkl hybrid_away_xgb.pkl hybrid_scaler.pkl; do
+            if [ ! -f "model/$file" ]; then
+              echo "ERROR: model/$file MISSING"
+              exit 1
             fi
           done
-          if [ $missing -gt 0 ]; then
-            echo "ERROR: Missing $missing model file(s)"
-            exit 1
-          fi
 
       - name: Step 2d - Generate predictions
         if: steps.odds_check.outputs.new_odds == 'true'
-        run: |
-          echo "Running ML predictions..."
-          python predict.py
+        run: python predict.py
         continue-on-error: false
 
       - name: Verify NBA_PREDICTIONS_ML.csv
         if: steps.odds_check.outputs.new_odds == 'true'
         run: |
-          if [ -f "NBA_PREDICTIONS_ML.csv" ]; then
-            echo "  Generated successfully — $(wc -l < NBA_PREDICTIONS_ML.csv) lines"
-          else
-            echo "  ERROR: NBA_PREDICTIONS_ML.csv not found!"
+          if [ ! -f "NBA_PREDICTIONS_ML.csv" ]; then
+            echo "ERROR: NBA_PREDICTIONS_ML.csv not found!"
             exit 1
           fi
 
@@ -139,9 +199,7 @@ jobs:
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          echo "Saving predictions to database..."
-          python new_save.py
+        run: python new_save.py
 
       - name: Step 3b - Save features to database
         if: steps.odds_check.outputs.new_odds == 'true'
@@ -151,9 +209,7 @@ jobs:
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          echo "Saving features to database..."
-          python features_store.py
+        run: python features_store.py
 
       # ===== STEP 4: GRADE & GAMEKEY =====
       - name: Step 4a - Run grading model
@@ -164,9 +220,7 @@ jobs:
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          echo "Running grading model..."
-          python new_grading_model.py
+        run: python new_grading_model.py
 
       - name: Step 4b - Generate game keys
         if: steps.odds_check.outputs.new_odds == 'true'
@@ -176,9 +230,7 @@ jobs:
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          echo "Generating game keys..."
-          python game_key.py
+        run: python game_key.py
 
       # ===== STEP 5: COMMIT & PUSH =====
       - name: Commit and push results
@@ -187,57 +239,115 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          # Pull before pushing
-          echo "Syncing with remote..."
-          git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null || echo "Already up to date"
+          git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null || true
 
-          # Add generated files
-          echo "Adding prediction files..."
           git add -f nba_prematch_features.csv 2>/dev/null || true
           git add -f upcoming_nba_draftkings_odds.csv 2>/dev/null || true
           git add -f Future.csv 2>/dev/null || true
           git add -f NBA_PREDICTIONS_ML.csv 2>/dev/null || true
 
-          # Remove flag file from tracking
-          rm -f new_odds_found.flag
+          rm -f new_odds_found.flag checker_summary.json checker_output.txt
 
-          # Check if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
 
-          # Commit
-          echo "Changes detected, committing..."
           git commit -m "Hourly: NBA predictions (new odds detected) $(date +'%Y-%m-%d %H:%M UTC')"
 
-          # Push with retry
           max_retries=5
           retry_count=0
           while [ $retry_count -lt $max_retries ]; do
             retry_count=$((retry_count+1))
-            echo "Push attempt $retry_count/$max_retries..."
-
             if git push origin main 2>&1; then
-              echo "Successfully pushed to main!"
               exit 0
             elif git push origin master 2>&1; then
-              echo "Successfully pushed to master!"
               exit 0
             fi
-
             if [ $retry_count -lt $max_retries ]; then
-              echo "Retrying in 10 seconds..."
               sleep 10
               git pull --rebase origin main 2>&1 || git pull --rebase origin master 2>&1 || true
             fi
           done
-
-          echo "Failed to push after $max_retries attempts"
           exit 1
         continue-on-error: true
 
-      # Upload as backup
+      # ===== SLACK: Pipeline completed =====
+      - name: Slack - Pipeline completed
+        if: steps.odds_check.outputs.new_odds == 'true' && success()
+        run: |
+          # Build prediction summary from CSV
+          PRED_SUMMARY=$(python3 -c "
+          import pandas as pd
+          df = pd.read_csv('NBA_PREDICTIONS_ML.csv')
+          lines = []
+          for _, r in df.iterrows():
+              winner = r['home_team'] if r['ml_prediction'] == 'Home Win' else r['away_team']
+              conf = r['ml_confidence']
+              grade = r['grade']
+              ou = r['ou_predicted']
+              total = int(r['total_points_predicted'])
+              lines.append(f\"{r['away_team']} @ {r['home_team']}  |  {winner} ({conf:.0f}% {grade})  |  {ou} {total}pts\")
+          print('\n'.join(lines))
+          " 2>/dev/null || echo "Could not parse predictions")
+
+          GAME_COUNT=$(python3 -c "import pandas as pd; print(len(pd.read_csv('NBA_PREDICTIONS_ML.csv')))" 2>/dev/null || echo "?")
+
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "$(cat <<SLACK
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {"type": "plain_text", "text": "NBA Predictions Complete"}
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {"type": "mrkdwn", "text": "*Games predicted:* ${GAME_COUNT}"},
+                  {"type": "mrkdwn", "text": "*Time:* $(date -u +'%Y-%m-%d %H:%M UTC')"}
+                ]
+              },
+              {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": "*Predictions:*\n\`\`\`\n${PRED_SUMMARY}\n\`\`\`"}
+              },
+              {
+                "type": "context",
+                "elements": [{"type": "mrkdwn", "text": "Saved to DB + graded + committed to repo"}]
+              }
+            ]
+          }
+          SLACK
+          )"
+
+      # ===== SLACK: Pipeline failed =====
+      - name: Slack - Pipeline failed
+        if: steps.odds_check.outputs.new_odds == 'true' && failure()
+        run: |
+          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "$(cat <<SLACK
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {"type": "plain_text", "text": "NBA Pipeline FAILED"}
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {"type": "mrkdwn", "text": "*Status:* Failed"},
+                  {"type": "mrkdwn", "text": "*Time:* $(date -u +'%Y-%m-%d %H:%M UTC')"},
+                  {"type": "mrkdwn", "text": "*Run:* <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"}
+                ]
+              }
+            ]
+          }
+          SLACK
+          )"
+
       - name: Upload predictions as backup artifact
         if: steps.odds_check.outputs.new_odds == 'true'
         uses: actions/upload-artifact@v4
@@ -249,11 +359,3 @@ jobs:
             Future.csv
             NBA_PREDICTIONS_ML.csv
           retention-days: 7
-
-      - name: Summary
-        run: |
-          if [ "${{ steps.odds_check.outputs.new_odds }}" == "true" ]; then
-            echo "Pipeline executed — new odds were found and processed"
-          else
-            echo "No new odds found — pipeline skipped (checked at $(date +'%H:%M UTC'))"
-          fi
