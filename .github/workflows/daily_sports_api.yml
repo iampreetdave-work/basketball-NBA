@@ -1,0 +1,209 @@
+name: NBA Daily Predictions - Sports API Pipeline
+
+on:
+  schedule:
+    - cron: '30 6 * * *'  # Runs daily at 6:30 AM UTC (30 min after original pipeline)
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ===== STEP 1: FETCH PRE-MATCH FEATURES (reuses existing Pre_Match.py) =====
+      - name: Step 1 - Fetch today's matches and features
+        run: |
+          echo "Fetching today's NBA matches..."
+          python Pre_Match.py
+        continue-on-error: false
+
+      - name: Verify nba_prematch_features.csv
+        run: |
+          echo "Checking nba_prematch_features.csv..."
+          if [ -f "nba_prematch_features.csv" ]; then
+            echo "  Generated successfully"
+            echo "  Size: $(ls -lh nba_prematch_features.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l nba_prematch_features.csv)"
+          else
+            echo "  ERROR: nba_prematch_features.csv not found!"
+            exit 1
+          fi
+
+      # ===== STEP 2: FETCH ODDS FROM API-BASKETBALL (new source) =====
+      - name: Step 2 - Fetch odds from API-Basketball
+        run: |
+          echo "Fetching odds from API-Basketball (up to 7 days ahead)..."
+          python sports_odds.py
+        continue-on-error: false
+
+      - name: Verify upcoming_nba_sports_api_odds.csv
+        run: |
+          echo "Checking upcoming_nba_sports_api_odds.csv..."
+          if [ -f "upcoming_nba_sports_api_odds.csv" ]; then
+            echo "  Generated successfully"
+            echo "  Size: $(ls -lh upcoming_nba_sports_api_odds.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l upcoming_nba_sports_api_odds.csv)"
+          else
+            echo "  ERROR: upcoming_nba_sports_api_odds.csv not found!"
+            exit 1
+          fi
+
+      # ===== STEP 3: COMBINE FEATURES + ODDS =====
+      - name: Step 3 - Combine features and odds into Future_sports_api.csv
+        run: |
+          echo "Combining features into Future_sports_api.csv..."
+          python combine_sports_api.py
+        continue-on-error: false
+
+      - name: Verify Future_sports_api.csv was created
+        run: |
+          echo "Checking generated CSV files:"
+          ls -lh *.csv 2>/dev/null || echo "No CSV files found"
+          echo ""
+          if [ -f "Future_sports_api.csv" ]; then
+            echo "Future_sports_api.csv generated successfully"
+            echo "  Size: $(ls -lh Future_sports_api.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l Future_sports_api.csv)"
+          else
+            echo "ERROR: Future_sports_api.csv not found!"
+            exit 1
+          fi
+
+      - name: Verify trained models exist
+        run: |
+          echo "Checking trained models..."
+          if [ -d "model" ]; then
+            echo "model/ folder found"
+            ls -lh model/
+
+            required_files=("hybrid_home_xgb.pkl" "hybrid_away_xgb.pkl" "hybrid_scaler.pkl")
+            missing=0
+            for file in "${required_files[@]}"; do
+              if [ -f "model/$file" ]; then
+                echo "  $file OK"
+              else
+                echo "  $file MISSING"
+                missing=$((missing+1))
+              fi
+            done
+
+            if [ $missing -gt 0 ]; then
+              echo "ERROR: Missing $missing model file(s)"
+              exit 1
+            fi
+          else
+            echo "ERROR: model/ folder not found"
+            exit 1
+          fi
+
+      # ===== STEP 4: GENERATE PREDICTIONS =====
+      - name: Step 4 - Generate model predictions (sports_api)
+        run: |
+          echo "Running ML predictions (Sports API pipeline)..."
+          echo "Input file: Future_sports_api.csv"
+          python predict_sports_api.py
+        continue-on-error: false
+
+      - name: Verify prediction output - NBA_PREDICTIONS_ML_sports_api.csv
+        run: |
+          echo "Verifying prediction outputs..."
+          if [ -f "NBA_PREDICTIONS_ML_sports_api.csv" ]; then
+            echo "NBA_PREDICTIONS_ML_sports_api.csv generated successfully"
+            echo "  Size: $(ls -lh NBA_PREDICTIONS_ML_sports_api.csv | awk '{print $5}')"
+            echo "  Lines: $(wc -l NBA_PREDICTIONS_ML_sports_api.csv)"
+          else
+            echo "ERROR: NBA_PREDICTIONS_ML_sports_api.csv not found!"
+            exit 1
+          fi
+
+      - name: Display all generated files
+        run: |
+          echo "All generated CSV files for this run:"
+          ls -lh *.csv 2>/dev/null | awk '{print $9, "(" $5 ")"}'
+          echo ""
+          echo "Sports API pipeline files:"
+          echo "  1. nba_prematch_features.csv (Pre_Match.py - shared)"
+          echo "  2. upcoming_nba_sports_api_odds.csv (sports_odds.py)"
+          echo "  3. Future_sports_api.csv (combine_sports_api.py)"
+          echo "  4. NBA_PREDICTIONS_ML_sports_api.csv (predict_sports_api.py)"
+
+      # ===== STEP 5: COMMIT & PUSH =====
+      - name: Commit and push results
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Pull before pushing to avoid conflicts
+          echo "Syncing with remote..."
+          git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null || echo "Already up to date"
+
+          # Add only sports_api pipeline files (never touch original pipeline outputs)
+          echo "Adding sports_api prediction files..."
+          git add -f upcoming_nba_sports_api_odds.csv 2>/dev/null || echo "upcoming_nba_sports_api_odds.csv not found"
+          git add -f Future_sports_api.csv 2>/dev/null || echo "Future_sports_api.csv not found"
+          git add -f NBA_PREDICTIONS_ML_sports_api.csv 2>/dev/null || echo "NBA_PREDICTIONS_ML_sports_api.csv not found"
+
+          # Check if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          # Commit changes
+          echo "Changes detected, committing..."
+          git commit -m "Auto: NBA predictions (Sports API) $(date +'%Y-%m-%d %H:%M UTC')"
+
+          # Push with retry logic
+          max_retries=5
+          retry_count=0
+          while [ $retry_count -lt $max_retries ]; do
+            retry_count=$((retry_count+1))
+            echo "Push attempt $retry_count/$max_retries..."
+
+            if git push origin main 2>&1; then
+              echo "Successfully pushed to main!"
+              exit 0
+            elif git push origin master 2>&1; then
+              echo "Successfully pushed to master!"
+              exit 0
+            fi
+
+            if [ $retry_count -lt $max_retries ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+              git pull --rebase origin main 2>&1 || git pull --rebase origin master 2>&1 || true
+            fi
+          done
+
+          echo "Failed to push after $max_retries attempts"
+          exit 1
+        continue-on-error: true
+
+      # Upload as backup
+      - name: Upload predictions as backup artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-predictions-sports-api-${{ github.run_number }}
+          path: |
+            upcoming_nba_sports_api_odds.csv
+            Future_sports_api.csv
+            NBA_PREDICTIONS_ML_sports_api.csv
+          retention-days: 7
