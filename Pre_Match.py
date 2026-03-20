@@ -34,6 +34,7 @@ TEAM_ALIASES = {
     "Houston Rockets": "HOU",
     "Indiana Pacers": "IND",
     "LA Clippers": "LAC",
+    "Los Angeles Clippers": "LAC",
     "LA Lakers": "LAL",
     "Los Angeles Lakers": "LAL",
     "Memphis Grizzlies": "MEM",
