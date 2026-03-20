@@ -1,0 +1,259 @@
+name: NBA Hourly Odds Monitor & Pipeline
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour at :00
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  check-and-predict:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ===== STEP 1: CHECK FOR NEW ODDS =====
+      - name: Check for new odds
+        id: odds_check
+        run: |
+          echo "Checking The Odds API for new odds..."
+          python hourly_odds_checker.py | tee checker_output.txt
+
+          # Check if new odds were found
+          if grep -q "NEW_ODDS_FOUND" checker_output.txt; then
+            echo "new_odds=true" >> $GITHUB_OUTPUT
+            echo "New odds detected — triggering full pipeline"
+          else
+            echo "new_odds=false" >> $GITHUB_OUTPUT
+            echo "No new odds — skipping pipeline"
+          fi
+
+      # ===== STEP 2: FULL PIPELINE (only if new odds found) =====
+      - name: Step 2a - Fetch pre-match features
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          echo "Fetching NBA pre-match features..."
+          python Pre_Match.py
+        continue-on-error: false
+
+      - name: Verify nba_prematch_features.csv
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          if [ -f "nba_prematch_features.csv" ]; then
+            echo "  Generated successfully — $(wc -l < nba_prematch_features.csv) lines"
+          else
+            echo "  ERROR: nba_prematch_features.csv not found!"
+            exit 1
+          fi
+
+      - name: Step 2b - Fetch odds
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          echo "Fetching DraftKings/FanDuel odds..."
+          python Odds_Pre_Match.py
+        continue-on-error: false
+
+      - name: Verify upcoming_nba_draftkings_odds.csv
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          if [ -f "upcoming_nba_draftkings_odds.csv" ]; then
+            echo "  Generated successfully — $(wc -l < upcoming_nba_draftkings_odds.csv) lines"
+          else
+            echo "  ERROR: upcoming_nba_draftkings_odds.csv not found!"
+            exit 1
+          fi
+
+      - name: Step 2c - Combine features and odds
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          echo "Combining into Future.csv..."
+          python Combine.py
+        continue-on-error: false
+
+      - name: Verify Future.csv
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          if [ -f "Future.csv" ]; then
+            echo "  Generated successfully — $(wc -l < Future.csv) lines"
+          else
+            echo "  ERROR: Future.csv not found!"
+            exit 1
+          fi
+
+      - name: Verify trained models exist
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          required_files=("hybrid_home_xgb.pkl" "hybrid_away_xgb.pkl" "hybrid_scaler.pkl")
+          missing=0
+          for file in "${required_files[@]}"; do
+            if [ -f "model/$file" ]; then
+              echo "  $file OK"
+            else
+              echo "  $file MISSING"
+              missing=$((missing+1))
+            fi
+          done
+          if [ $missing -gt 0 ]; then
+            echo "ERROR: Missing $missing model file(s)"
+            exit 1
+          fi
+
+      - name: Step 2d - Generate predictions
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          echo "Running ML predictions..."
+          python predict.py
+        continue-on-error: false
+
+      - name: Verify NBA_PREDICTIONS_ML.csv
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          if [ -f "NBA_PREDICTIONS_ML.csv" ]; then
+            echo "  Generated successfully — $(wc -l < NBA_PREDICTIONS_ML.csv) lines"
+          else
+            echo "  ERROR: NBA_PREDICTIONS_ML.csv not found!"
+            exit 1
+          fi
+
+      # ===== STEP 3: SAVE TO DATABASE =====
+      - name: Step 3a - Save predictions to database
+        if: steps.odds_check.outputs.new_odds == 'true'
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "Saving predictions to database..."
+          python new_save.py
+
+      - name: Step 3b - Save features to database
+        if: steps.odds_check.outputs.new_odds == 'true'
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "Saving features to database..."
+          python features_store.py
+
+      # ===== STEP 4: GRADE & GAMEKEY =====
+      - name: Step 4a - Run grading model
+        if: steps.odds_check.outputs.new_odds == 'true'
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "Running grading model..."
+          python new_grading_model.py
+
+      - name: Step 4b - Generate game keys
+        if: steps.odds_check.outputs.new_odds == 'true'
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "Generating game keys..."
+          python game_key.py
+
+      # ===== STEP 5: COMMIT & PUSH =====
+      - name: Commit and push results
+        if: steps.odds_check.outputs.new_odds == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Pull before pushing
+          echo "Syncing with remote..."
+          git pull --rebase origin main 2>/dev/null || git pull --rebase origin master 2>/dev/null || echo "Already up to date"
+
+          # Add generated files
+          echo "Adding prediction files..."
+          git add -f nba_prematch_features.csv 2>/dev/null || true
+          git add -f upcoming_nba_draftkings_odds.csv 2>/dev/null || true
+          git add -f Future.csv 2>/dev/null || true
+          git add -f NBA_PREDICTIONS_ML.csv 2>/dev/null || true
+
+          # Remove flag file from tracking
+          rm -f new_odds_found.flag
+
+          # Check if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          # Commit
+          echo "Changes detected, committing..."
+          git commit -m "Hourly: NBA predictions (new odds detected) $(date +'%Y-%m-%d %H:%M UTC')"
+
+          # Push with retry
+          max_retries=5
+          retry_count=0
+          while [ $retry_count -lt $max_retries ]; do
+            retry_count=$((retry_count+1))
+            echo "Push attempt $retry_count/$max_retries..."
+
+            if git push origin main 2>&1; then
+              echo "Successfully pushed to main!"
+              exit 0
+            elif git push origin master 2>&1; then
+              echo "Successfully pushed to master!"
+              exit 0
+            fi
+
+            if [ $retry_count -lt $max_retries ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+              git pull --rebase origin main 2>&1 || git pull --rebase origin master 2>&1 || true
+            fi
+          done
+
+          echo "Failed to push after $max_retries attempts"
+          exit 1
+        continue-on-error: true
+
+      # Upload as backup
+      - name: Upload predictions as backup artifact
+        if: steps.odds_check.outputs.new_odds == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-hourly-predictions-${{ github.run_number }}
+          path: |
+            nba_prematch_features.csv
+            upcoming_nba_draftkings_odds.csv
+            Future.csv
+            NBA_PREDICTIONS_ML.csv
+          retention-days: 7
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.odds_check.outputs.new_odds }}" == "true" ]; then
+            echo "Pipeline executed — new odds were found and processed"
+          else
+            echo "No new odds found — pipeline skipped (checked at $(date +'%H:%M UTC'))"
+          fi
