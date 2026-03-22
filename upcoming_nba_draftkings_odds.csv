@@ -1,6 +1,6 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2026-03-22_POR@DEN,2026-03-22,2026-03-22T21:10:00Z,Denver Nuggets,Portland Trail Blazers,upcoming,draftkings,-8.5,8.5,1.87,1.95,242.5,1.91,1.91,1.28,3.8
-2026-03-22_BKN@SAC,2026-03-22,2026-03-22T22:10:00Z,Sacramento Kings,Brooklyn Nets,upcoming,draftkings,-4.5,4.5,1.91,1.91,218.5,1.91,1.91,1.49,2.7
-2026-03-22_WSH@NY,2026-03-22,2026-03-22T23:40:00Z,New York Knicks,Washington Wizards,upcoming,draftkings,-20.5,20.5,1.95,1.87,227.5,1.87,1.95,1.04,13.0
-2026-03-23_MIN@BOS,2026-03-23,2026-03-23T00:10:00Z,Boston Celtics,Minnesota Timberwolves,upcoming,draftkings,-9.5,9.5,1.87,1.95,219.5,1.91,1.91,1.25,4.1
-2026-03-23_TOR@PHX,2026-03-23,2026-03-23T01:10:00Z,Phoenix Suns,Toronto Raptors,upcoming,draftkings,1.5,-1.5,1.89,1.93,220.5,1.91,1.91,2.1,1.77
+2026-03-22_POR@DEN,2026-03-22,2026-03-22T21:10:00Z,Denver Nuggets,Portland Trail Blazers,upcoming,draftkings,-8.5,8.5,1.87,1.95,242.5,1.91,1.91,1.28,3.85
+2026-03-22_BKN@SAC,2026-03-22,2026-03-22T22:10:00Z,Sacramento Kings,Brooklyn Nets,upcoming,draftkings,-4.5,4.5,1.89,1.93,218.5,1.91,1.91,1.51,2.64
+2026-03-22_WSH@NY,2026-03-22,2026-03-22T23:40:00Z,New York Knicks,Washington Wizards,upcoming,draftkings,-19.5,19.5,1.87,1.95,228.5,1.95,1.87,1.04,13.0
+2026-03-23_MIN@BOS,2026-03-23,2026-03-23T00:10:00Z,Boston Celtics,Minnesota Timberwolves,upcoming,draftkings,-9.5,9.5,1.87,1.95,219.5,1.87,1.95,1.25,4.1
+2026-03-23_TOR@PHX,2026-03-23,2026-03-23T01:10:00Z,Phoenix Suns,Toronto Raptors,upcoming,draftkings,1.5,-1.5,1.91,1.91,220.5,1.91,1.91,2.0,1.83
