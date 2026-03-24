@@ -1,11 +1,4 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
-2026-03-23_IND@ORL,2026-03-23,2026-03-23T23:00:00+00:00,Orlando Magic,Indiana Pacers,upcoming,pinnacle,-13.0,-13.0,1.94,1.94,232.5,1.92,1.92,6.73,1.12
-2026-03-23_OKC@PHI,2026-03-23,2026-03-23T23:00:00+00:00,Philadelphia 76ers,Oklahoma City Thunder,upcoming,pinnacle,15.5,15.0,1.92,1.88,221.5,1.92,1.92,1.08,8.76
-2026-03-23_LAL@DET,2026-03-23,2026-03-23T23:00:00+00:00,Detroit Pistons,Los Angeles Lakers,upcoming,pinnacle,2.5,2.0,1.89,1.91,226.5,1.93,1.9,1.76,2.16
-2026-03-23_SA@MIA,2026-03-23,2026-03-23T23:00:00+00:00,Miami Heat,San Antonio Spurs,upcoming,pinnacle,5.5,5.0,1.88,1.92,240.0,1.9,1.95,1.49,2.77
-2026-03-23_MEM@ATL,2026-03-23,2026-03-23T23:30:00+00:00,Atlanta Hawks,Memphis Grizzlies,upcoming,pinnacle,-13.5,-13.5,1.93,1.95,239.5,1.91,1.92,7.24,1.11
-2026-03-24_HOU@CHI,2026-03-24,2026-03-24T00:00:00+00:00,Chicago Bulls,Houston Rockets,upcoming,pinnacle,8.5,8.0,1.88,1.92,228.5,1.92,1.92,1.29,3.86
-2026-03-24_TOR@UTAH,2026-03-24,2026-03-24T01:00:00+00:00,Utah Jazz,Toronto Raptors,upcoming,bet365,12.5,12.5,1.9,1.9,229.5,1.9,1.9,1.13,6.25
-2026-03-24_GS@DAL,2026-03-24,2026-03-24T01:30:00+00:00,Dallas Mavericks,Golden State Warriors,upcoming,pinnacle,2.5,2.5,1.94,1.92,230.5,1.92,1.92,1.78,2.15
-2026-03-24_BKN@POR,2026-03-24,2026-03-24T02:00:00+00:00,Portland Trail Blazers,Brooklyn Nets,upcoming,pinnacle,-14.0,-14.5,1.88,1.92,219.5,1.93,1.9,7.91,1.1
-2026-03-24_MIL@LAC,2026-03-24,2026-03-24T02:30:00+00:00,Los Angeles Clippers,Milwaukee Bucks,upcoming,pinnacle,-13.0,-13.5,1.91,1.88,224.0,1.91,1.94,6.88,1.12
+2026-03-24_SAC@CHA,2026-03-24,2026-03-24T23:00:00+00:00,Charlotte Hornets,Sacramento Kings,upcoming,pinnacle,-17.0,-17.0,1.95,1.93,230.0,1.92,1.93,11.1,1.06
+2026-03-24_NO@NY,2026-03-24,2026-03-24T23:30:00+00:00,New York Knicks,New Orleans Pelicans,upcoming,pinnacle,-8.5,-9.0,1.89,1.9,231.0,1.89,1.94,4.14,1.26
+2026-03-25_DEN@PHX,2026-03-25,2026-03-25T03:00:00+00:00,Phoenix Suns,Denver Nuggets,upcoming,pinnacle,5.5,5.0,1.9,1.89,234.0,1.88,1.94,1.47,2.85
