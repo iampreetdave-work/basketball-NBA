@@ -1,8 +1,8 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,home_winning_odds_decimal,away_winning_odds_decimal
-2026-03-28_SA@MIL,2026-03-28,2026-03-28T19:10:00Z,Milwaukee Bucks,San Antonio Spurs,upcoming,draftkings,18.5,-18.5,1.93,1.89,226.5,1.93,1.89,12.0,1.05
+2026-03-28_SA@MIL,2026-03-28,2026-03-28T19:10:00Z,Milwaukee Bucks,San Antonio Spurs,upcoming,draftkings,18.5,-18.5,1.93,1.89,226.5,1.95,1.87,12.0,1.05
 2026-03-28_DET@MIN,2026-03-28,2026-03-28T21:40:00Z,Minnesota Timberwolves,Detroit Pistons,upcoming,draftkings,-2.5,2.5,1.93,1.89,223.5,1.93,1.89,1.74,2.14
-2026-03-28_PHI@CHA,2026-03-28,2026-03-28T22:10:00Z,Charlotte Hornets,Philadelphia 76ers,upcoming,draftkings,-5.5,5.5,1.87,1.95,232.5,1.91,1.91,1.46,2.8
+2026-03-28_PHI@CHA,2026-03-28,2026-03-28T22:10:00Z,Charlotte Hornets,Philadelphia 76ers,upcoming,draftkings,-5.5,5.5,1.87,1.95,233.5,1.93,1.89,1.46,2.8
 2026-03-28_SAC@ATL,2026-03-28,2026-03-28T23:40:00Z,Atlanta Hawks,Sacramento Kings,upcoming,draftkings,-14.5,14.5,1.87,1.95,237.5,1.91,1.91,1.1,7.5
 2026-03-29_CHI@MEM,2026-03-29,2026-03-29T00:10:00Z,Memphis Grizzlies,Chicago Bulls,upcoming,draftkings,3.5,-3.5,1.89,1.93,244.5,1.87,1.95,2.45,1.57
-2026-03-29_UTAH@PHX,2026-03-29,2026-03-29T02:10:00Z,Phoenix Suns,Utah Jazz,upcoming,draftkings,-16.5,16.5,1.87,1.95,229.5,1.87,1.95,1.07,9.0
+2026-03-29_UTAH@PHX,2026-03-29,2026-03-29T02:10:00Z,Phoenix Suns,Utah Jazz,upcoming,draftkings,-17.5,17.5,1.95,1.87,230.5,1.95,1.87,1.07,9.0
 2026-03-29_NY@OKC,2026-03-29,2026-03-29T23:40:00Z,Oklahoma City Thunder,New York Knicks,upcoming,fanduel,-8.5,8.5,1.88,1.94,224.5,1.94,1.88,1.27,4.0
