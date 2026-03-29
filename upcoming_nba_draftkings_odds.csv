@@ -1,11 +1,10 @@
 game_identifier,date,start_time,home_team,away_team,status,bookmaker_used,home_spread,away_spread,home_spread_odds_decimal,away_spread_odds_decimal,total_line_o,total_line_over_odds_decimal,total_line_under_odds_decimal,away_winning_odds_decimal,home_winning_odds_decimal
-2026-03-29_UTAH@PHX,2026-03-29,2026-03-29T02:10:00Z,Phoenix Suns,Utah Jazz,upcoming,draftkings,-26.5,26.5,1.95,1.8,,,,,
-2026-03-29_LAC@MIL,2026-03-29,2026-03-29T19:40:00Z,Milwaukee Bucks,Los Angeles Clippers,upcoming,draftkings,14.5,-14.5,1.89,1.93,222.5,1.91,1.91,1.12,6.75
+2026-03-29_LAC@MIL,2026-03-29,2026-03-29T19:40:00Z,Milwaukee Bucks,Los Angeles Clippers,upcoming,draftkings,14.5,-14.5,1.87,1.95,222.5,1.89,1.93,1.11,7.0
 2026-03-29_MIA@IND,2026-03-29,2026-03-29T21:10:00Z,Indiana Pacers,Miami Heat,upcoming,draftkings,9.5,-9.5,1.87,1.95,245.5,1.95,1.87,1.24,4.2
 2026-03-29_BOS@CHA,2026-03-29,2026-03-29T22:10:00Z,Charlotte Hornets,Boston Celtics,upcoming,draftkings,1.5,-1.5,1.87,1.95,215.5,1.91,1.91,1.85,1.98
-2026-03-29_SAC@BKN,2026-03-29,2026-03-29T22:10:00Z,Brooklyn Nets,Sacramento Kings,upcoming,draftkings,-1.5,1.5,1.98,1.85,221.5,1.91,1.91,1.95,1.87
-2026-03-29_ORL@TOR,2026-03-29,2026-03-29T22:10:00Z,Toronto Raptors,Orlando Magic,upcoming,draftkings,-2.5,2.5,1.89,1.93,224.5,1.91,1.91,2.24,1.68
-2026-03-29_WSH@POR,2026-03-29,2026-03-29T22:10:00Z,Portland Trail Blazers,Washington Wizards,upcoming,draftkings,-15.5,15.5,1.87,1.95,238.5,1.95,1.87,8.0,1.09
-2026-03-29_HOU@NO,2026-03-29,2026-03-29T23:10:00Z,New Orleans Pelicans,Houston Rockets,upcoming,draftkings,5.5,-5.5,1.95,1.87,225.5,1.93,1.89,1.46,2.8
-2026-03-29_NY@OKC,2026-03-29,2026-03-29T23:40:00Z,Oklahoma City Thunder,New York Knicks,upcoming,draftkings,-8.5,8.5,1.93,1.89,224.5,1.93,1.89,3.85,1.28
-2026-03-30_GS@DEN,2026-03-30,2026-03-30T02:10:00Z,Denver Nuggets,Golden State Warriors,upcoming,draftkings,-11.5,11.5,1.91,1.91,238.5,1.91,1.91,5.4,1.17
+2026-03-29_SAC@BKN,2026-03-29,2026-03-29T22:10:00Z,Brooklyn Nets,Sacramento Kings,upcoming,draftkings,1.5,-1.5,1.83,2.0,221.5,1.91,1.91,1.87,1.95
+2026-03-29_ORL@TOR,2026-03-29,2026-03-29T22:10:00Z,Toronto Raptors,Orlando Magic,upcoming,draftkings,-2.5,2.5,1.93,1.89,224.5,1.91,1.91,2.14,1.74
+2026-03-29_WSH@POR,2026-03-29,2026-03-29T22:10:00Z,Portland Trail Blazers,Washington Wizards,upcoming,draftkings,-15.5,15.5,1.89,1.93,238.5,1.95,1.87,8.5,1.08
+2026-03-29_HOU@NO,2026-03-29,2026-03-29T23:10:00Z,New Orleans Pelicans,Houston Rockets,upcoming,draftkings,5.5,-5.5,1.95,1.87,225.5,1.93,1.89,1.44,2.85
+2026-03-29_NY@OKC,2026-03-29,2026-03-29T23:40:00Z,Oklahoma City Thunder,New York Knicks,upcoming,draftkings,-8.5,8.5,1.93,1.89,224.5,1.95,1.87,3.85,1.28
+2026-03-30_GS@DEN,2026-03-30,2026-03-30T02:10:00Z,Denver Nuggets,Golden State Warriors,upcoming,draftkings,-11.5,11.5,1.87,1.95,239.5,1.95,1.87,5.4,1.17
